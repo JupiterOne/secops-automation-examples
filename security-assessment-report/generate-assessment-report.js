@@ -12,6 +12,20 @@ const J1_API_TOKEN = process.env.J1_API_TOKEN;
 const J1_USERNAME = process.env.J1_USERNAME;
 const J1_PASSWORD = process.env.J1_PASSWORD;
 
+function parseArrayString(text) {
+  let output = '';
+  if (text) {
+    if (Array.isArray(text)) {
+      text.forEach(function(item) {
+        output += `${item}\n\n`;
+      });
+    } else {
+      output = text;
+    }
+  } 
+  return output;
+}
+
 async function main() {
   program
     .usage('[options]')
@@ -35,7 +49,7 @@ async function main() {
     if (a.entity && a.properties) {
       const reportOverview = 
         `# ${a.entity.displayName}\n\n` + 
-        `**Assessors**: ${a.properties.assessors}\n\n` +
+        `**Assessor(s)**: ${a.properties.assessors}\n\n` +
         `**Completed On**: ${a.properties.completedOn}\n\n` +
         `## Overview\n\n` +
         `${a.properties.summary ? '### Summary\n\n' + a.properties.summary + '\n\n' : ''}` +
@@ -51,14 +65,27 @@ async function main() {
 
         for (const f of findings) {
           if (f.entity && f.properties) {
+            const findingOverview = 
+              `### ${f.entity.displayName}\n\n` +
+              '`' + f.entity._type + '`\n\n' +
+              `**Severity**: ${f.properties.severity} (score: ${f.properties.numericSeverity})\n\n` +
+              `${f.properties.summary}\n\n` +
+              `> ${f.properties.description}\n\n` +
+              `${f.properties.stepsToReproduce ? '**Steps to Reproduce:**\n\n' + parseArrayString(f.properties.stepsToReproduce) + '\n\n' : ''}`;
+
+            // other finding details
+            const regex = /severity|numericSeverity|summary|description|stepsToReproduce/;
             const findingDetails = [];
-            Object.keys(f.properties).forEach(function(key, index) {
-              findingDetails.push(
-                `**${key}**:\n\n${f.properties[key]}\n\n`);
+            Object.keys(f.properties).forEach(function(key) {
+              const match = regex.exec(key);
+              if (!match) {
+                findingDetails.push(`- **${key}**:\n\n  ${f.properties[key]}\n\n`);
+              }
             });
-            reportFindings.push(`### ${f.entity.displayName}\n\n`);
-            reportFindings.push('`' + f.entity._type + '`\n\n');
-            reportFindings.push(findingDetails.join(''));
+            reportFindings.push(findingOverview);
+            if (findingDetails.length > 0) {
+              reportFindings.push('#### Additional Details\n\n' + findingDetails.join(''));
+            }
           }
         }
       }
