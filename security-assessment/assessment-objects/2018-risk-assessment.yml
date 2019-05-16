@@ -1,0 +1,24 @@
+- entityKey: assessment:risk:2018
+  entityType: risk_assessment
+  entityClass: Assessment
+  properties:
+    name: company-hipaa-risk-assessment-2018
+    displayName: HIPAA Risk Assessment 2018
+    summary: 2018 Annual HIPAA Risk Assessment
+    description:
+      (sample text)
+      Organization's security and compliance team assessed policies, controls
+      and procedures to ensure they meet and exceed
+      the requirements specified by HIPAA privacy rule and security rule.
+    details:
+      additional report details
+    category: risk-assessment
+    status: complete
+    assessors:
+      - security.staff@yourcompany.com
+      - internal.audit@yourcompany.com
+    open: false
+    classification: confidential
+    completedOn: '2018-07-23'
+    reportURL: https://link.to/finding-report
+    webLink: https://link.to/finding-report

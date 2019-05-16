@@ -1,0 +1,38 @@
+---
+  - entityKey: risk:endpoint-management-gaps
+    entityType: technical_risk
+    entityClass: Risk
+    properties:
+      name: Endpoint management gaps
+      displayName: Endpoint management gaps
+      summary: Lack of visibility on how user endpoint systems/devices are configured
+      description:
+        (sample text)
+        Endpoint systems should be configured according to the company's IT and
+        security standards. Because currently all enduser systems (e.g. laptops)
+        are self managed, there is a lack of centralized visibility into how
+        each system is configured and if they meet the compliance requirements
+
+      details:
+        'Systems should be configured with at least the following:'
+
+          1. Disk encryption enabled
+          2. Screensaver protection/screen lock on
+          3. Local firewall enabled
+          4. Remote login disabled
+          5. Auto install OS security patches enabled
+          6. (if it is Windows) Has Windows Defender or equivalent malware protection running
+
+      category: technical
+      threats: malware
+      targets: enduser devices
+      probability: 2
+      impact: 2
+      score: 4
+      status: open
+      assessment: company-hipaa-risk-assessment-2018
+      reporter: security@yourcompany.com
+      open: true
+      mitigation:
+      jiraKey: SEC-112
+      webLink: https://yourcompany.atlassian.net/browse/SEC-112
