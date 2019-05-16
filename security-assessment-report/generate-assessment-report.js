@@ -42,11 +42,13 @@ async function main() {
       accessToken: J1_API_TOKEN
     })).init();
   
+  // Query J1 for the assessment with name provided as input
   const query = `Find Assessment with name='${program.assessment}'`;
   const assessments = await j1Client.queryV1(query);
 
   for (const a of assessments || []) {
     if (a.entity && a.properties) {
+      // Build Markdown string for report overview
       const reportOverview = 
         `# ${a.entity.displayName}\n\n` + 
         `**Assessor(s)**: ${a.properties.assessors}\n\n` +
@@ -56,10 +58,12 @@ async function main() {
         `${a.properties.description ? '### Description\n\n' + a.properties.description + '\n\n' : ''}` +
         `${a.properties.details ? '### Details\n\n' + a.properties.details + '\n\n' : ''}`;
   
+      // Query J1 for all Findings or Risks identified by the Assessment
       const findingsQuery = `Find (Risk|Finding) that relates to Assessment with name='${program.assessment}'`;
       const findings = await j1Client.queryV1(findingsQuery);
       const reportFindings = [];
 
+      // Build Markdown string with details of each finding
       if (findings && findings.length > 0) {
         reportFindings.push('## Findings\n\n');
 
@@ -73,7 +77,7 @@ async function main() {
               `> ${f.properties.description}\n\n` +
               `${f.properties.stepsToReproduce ? '**Steps to Reproduce:**\n\n' + parseArrayString(f.properties.stepsToReproduce) + '\n\n' : ''}`;
 
-            // other finding details
+            // Other finding details
             const regex = /severity|numericSeverity|summary|description|stepsToReproduce/;
             const findingDetails = [];
             Object.keys(f.properties).forEach(function(key) {
@@ -90,8 +94,8 @@ async function main() {
         }
       }
       
+      // Generate Markdown and PDF files
       const output = reportOverview + reportFindings.join('');
-
       const reportFilename = `report-${a.id}`;
       fs.writeFileSync(`./${reportFilename}.md`, output);
       pdf().from(`./${reportFilename}.md`).to(`./${reportFilename}.pdf`, function() {
