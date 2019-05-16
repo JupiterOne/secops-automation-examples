@@ -17,16 +17,18 @@ this project. You can also install it globally:
 npm install @jupiterone/jupiterone-client-nodejs -g
 ```
 
+You will need the following environment variables in your local `.env` file
+
+```text
+J1_ACCOUNT_ID=yourAccountId
+J1_API_TOKEN=yourToken
+```
+
 ## Documenting security assessment findings
 
 `/security-assessment`
 
 - Write your lightweight assessment report and findings in YAML
-- Set up the following environment variables in your local `.env` file
-
-  - `J1_ACCOUNT_ID`
-  - `J1_API_TOKEN`
-
 - Run `publish.sh` to upload the entities to your JupiterOne account
 - See the results with a J1QL query like this:
 
@@ -41,3 +43,15 @@ More information:
 ## Generating a PDF report from an assessment
 
 `/security-assessment-report`
+
+Run the following command from the above directory to generate a Markdown and a
+PDF report of a security assessment by name, including all findings/risks
+identified by the assessment.
+
+```bash
+export $(grep -v '^#' ../.env | xargs)
+node generate-assessment-report.js --assessment 'name-of-the-assessment'
+```
+
+The `name-of-the-assessment` should match the value of `name` property of an
+existing `Assessment` entity in your J1 account.
