@@ -5,12 +5,14 @@ const program = require('commander');
 const fs = require('fs');
 const pdf = require("markdown-pdf");
 
-const J1_USER_POOL_ID = process.env.J1_USER_POOL_ID;
-const J1_CLIENT_ID = process.env.J1_CLIENT_ID;
-const J1_ACCOUNT_ID = process.env.J1_ACCOUNT_ID;
-const J1_API_TOKEN = process.env.J1_API_TOKEN;
-const J1_USERNAME = process.env.J1_USERNAME;
-const J1_PASSWORD = process.env.J1_PASSWORD;
+const {
+  J1_USER_POOL_ID: poolId,
+  J1_CLIENT_ID: clientId,
+  J1_ACCOUNT_ID: account,
+  J1_API_TOKEN: accessToken,
+  J1_USERNAME: username,
+  J1_PASSWORD: password
+} = process.env;
 
 function parseArrayString(text) {
   let output = '';
@@ -22,7 +24,7 @@ function parseArrayString(text) {
     } else {
       output = text;
     }
-  } 
+  }
   return output;
 }
 
@@ -31,17 +33,12 @@ async function main() {
     .usage('[options]')
     .option('--assessment <name>', 'The name an assessment entity in J1.')
     .parse(process.argv);
-  
+
   const j1Client =
-    await (new JupiterOneClient({
-      account: J1_ACCOUNT_ID,
-      username: J1_USERNAME,
-      password: J1_PASSWORD,
-      poolId: J1_USER_POOL_ID,
-      clientId: J1_CLIENT_ID,
-      accessToken: J1_API_TOKEN
-    })).init();
-  
+    await (new JupiterOneClient(
+      { account, username, password, poolId, clientId, accessToken }
+    )).init();
+
   // Query J1 for the assessment with name provided as input
   const query = `Find Assessment with name='${program.assessment}'`;
   const assessments = await j1Client.queryV1(query);
@@ -49,15 +46,15 @@ async function main() {
   for (const a of assessments || []) {
     if (a.entity && a.properties) {
       // Build Markdown string for report overview
-      const reportOverview = 
-        `# ${a.entity.displayName}\n\n` + 
+      const reportOverview =
+        `# ${a.entity.displayName}\n\n` +
         `**Assessor(s)**: ${a.properties.assessors}\n\n` +
         `**Completed On**: ${a.properties.completedOn}\n\n` +
         `## Overview\n\n` +
         `${a.properties.summary ? '### Summary\n\n' + a.properties.summary + '\n\n' : ''}` +
         `${a.properties.description ? '### Description\n\n' + a.properties.description + '\n\n' : ''}` +
         `${a.properties.details ? '### Details\n\n' + a.properties.details + '\n\n' : ''}`;
-  
+
       // Query J1 for all Findings or Risks identified by the Assessment
       const findingsQuery = `Find (Risk|Finding) that relates to Assessment with name='${program.assessment}'`;
       const findings = await j1Client.queryV1(findingsQuery);
@@ -69,7 +66,7 @@ async function main() {
 
         for (const f of findings) {
           if (f.entity && f.properties) {
-            const findingOverview = 
+            const findingOverview =
               `### ${f.entity.displayName}\n\n` +
               '`' + f.entity._type + '`\n\n' +
               `**Severity**: ${f.properties.severity} (score: ${f.properties.numericSeverity})\n\n` +
@@ -93,7 +90,7 @@ async function main() {
           }
         }
       }
-      
+
       // Generate Markdown and PDF files
       const output = reportOverview + reportFindings.join('');
       const reportFilename = `report-${a.id}`;
