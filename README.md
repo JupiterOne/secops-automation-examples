@@ -5,8 +5,10 @@ as code and to automate SecOps using the JupiterOne platform.
 
 The examples are in either `bash` or `javascript`.
 
-These scripts are provided as is. For questions, please post in the `#dev`
-channel in `jupiterone-community` Slack workspace.
+These scripts are provided as is. For questions, please post in the
+[jupiterone-community #dev][1] Slack workspace.
+
+[1]: https://jupiterone-community.slack.com/messages/CJMV4SFV5
 
 ## Prerequisites and dependencies
 
