@@ -1,0 +1,50 @@
+- entityKey: vendor:invision
+  entityType: invision
+  entityClass: Vendor
+  properties:
+    name: Invision
+    displayName: Invision
+    category: 
+      - software
+    description: design
+    validated: true
+    approved: true
+    approvalPRLink: https://github.com/yourorg/security-artifacts/pull-requests/2
+    approvalPRName: security-artifacts/2
+    website: https://www.invisionapp.com
+    owners:
+    mainContactName: 
+    mainContactEmail:
+    mainContactPhone:
+    mainContactAddress:
+    breachResponseDays:
+    linkToNDA:
+    linkToMSA:
+    linkToSLA:
+    linkToBAA:
+    linkToDPA:
+    linkToVTR:
+    linkToISA:
+    statusPage:
+    criticality: 5
+    risk: 5
+    tag.PHI: false
+    tag.PII: false
+    tag.PCI: false
+    notes: 
+
+- entityKey: account:invision
+  entityType: invision_account
+  entityClass: Account
+  properties:
+    name: Invision
+    displayName: Invision
+    category: 
+      - software
+    description: design
+    validated: true
+    webLink: https://www.invisionapp.com
+    owners:
+    admins:
+    vendor: Invision
+    notes:

@@ -1,0 +1,87 @@
+- entityKey: vendor:apple
+  entityType: apple
+  entityClass: Vendor
+  properties:
+    name: Apple
+    displayName: Apple
+    category: 
+      - software
+      - mobile
+      - development
+    description: >
+      Provides Developer account and App Store Connect account for mobile apps development
+    validated: true
+    approved: true
+    approvalPRLink: https://github.com/yourorg/security-artifacts/pull-requests/2
+    approvalPRName: security-artifacts/2
+    website: https://www.apple.com
+    owners:
+      - jon.smith@yourcompany.com
+      - owner.two@yourcompany.com
+    mainContactName: 
+    mainContactEmail:
+    mainContactPhone:
+    mainContactAddress:
+    breachResponseDays:
+    linkToNDA: https://developer.apple.com/terms/apple-developer-agreement/Apple-Developer-Agreement-English.pdf
+    linkToMSA: https://developer.apple.com/programs/whats-included/
+    linkToSLA: <link>
+    linkToBAA: <link>
+    linkToDPA: <link>
+    linkToVTR: <link>
+    linkToISA: <link>
+    criticality: 10
+    risk: 5
+    tag.PHI: false
+    tag.PII: true
+    tag.PCI: false
+    statusPage:
+    notes:
+
+- entityKey: account:apple:developer
+  entityType: apple_developer_account
+  entityClass: Account
+  properties:
+    name: Apple Developer Program
+    displayName: Apple Developer Program
+    category: 
+      - software
+      - mobile
+      - development
+    description: >
+      Used to provision iOS apps for distribution though App Store,
+      create and download development and distribution certificates,
+      submit apps to app store, manage beta test campaigns and app store meta data
+
+    validated: true
+    webLink: 
+      - https://developer.apple.com
+      - https://appstoreconnect.apple.com
+    owners:
+      - jon.smith@yourcompany.com
+      - owner.two@yourcompany.com
+    admins:
+      - jon.smith@yourcompany.com
+      - admin.two@yourcompany.com
+    users:
+      - user.one@yourcompany.com
+      - user.two@yourcompany.com
+    vendor: Apple
+    notes:
+      - "Some additional notes about this vendor"
+
+- entityKey: account:apple:business
+  entityType: apple_business_account
+  entityClass: Account
+  properties:
+    name: Apple Business
+    displayName: Apple Business
+    category: 
+      - procurement
+    description: purchasing
+    validated: true
+    webLink: https://www.apple.com
+    owners:
+    admins:
+    vendor: Apple
+    notes:
