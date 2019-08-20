@@ -63,7 +63,7 @@ existing `Assessment` entity in your J1 account.
 `/vendor-management`
 
 As part of your organization's third-party vendor management process, you will
-most likely need to keep track of a the details of each vendor, links to
+most likely need to keep track of the details of each vendor, links to
 contracts and agreements, and the accounts and users associated with each vendor.
 
 If you use SAML Single Sign On (SSO) for your SaaS accounts and your SSO
