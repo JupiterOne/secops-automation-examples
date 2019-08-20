@@ -74,9 +74,9 @@ For additional vendors, you can provide the details in a YAML file as shown in
 the examples in this repo, and publish them to your JupiterOne account.
 
 This way, you can leverage pull requests to serve as the vendor review/approval
-process. The PR can also be the trigger for security team to conduct more
-detailed vendor risk assessment, and provide a link to the report/questionnaire
-as part of the vendor entity YAML.
+process. The PR can also be the trigger for a security team member to conduct
+more detailed vendor risk assessment, and provide a link to the
+report/questionnaire as part of the vendor entity YAML.
 
 **Entities:**
 
