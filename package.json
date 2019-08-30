@@ -3,6 +3,6 @@
     "@jupiterone/jupiterone-client-nodejs": "^0.11.3",
     "commander": "^2.20.0",
     "dotenv": "^8.0.0",
-    "markdown-pdf": "^9.0.0"
+    "markdown-pdf": "^10.0.0"
   }
 }

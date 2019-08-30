@@ -1,0 +1,5 @@
+deploy/terraform/work/
+deploy/terraform/node_modules/
+work/
+dist/
+node_modules/
