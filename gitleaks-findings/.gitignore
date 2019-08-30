@@ -1,0 +1,10 @@
+node_modules/
+work/
+dist/
+.nyc_output/
+.npmrc
+yarn-error.log
+package-lock.json
+src/.env
+src/tmp
+.env

@@ -1,0 +1,27 @@
+{
+  "name": "jupiter-gitleaks-powerup",
+  "version": "1.0.0",
+  "description": "Ingest gitleaks findings for bitbucket and github organizations",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint ."
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@jupiterone/jupiterone-client-nodejs": "^0.13.5",
+    "aws-sdk": "^2.518.0",
+    "chalk": "^2.4.2",
+    "p-map": "^3.0.0",
+    "request": "^2.88.0",
+    "request-promise-native": "^1.0.7"
+  },
+  "devDependencies": {
+    "eslint": "^6.2.2",
+    "eslint-config-semistandard": "^15.0.0",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-node": "^9.2.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1"
+  }
+}
