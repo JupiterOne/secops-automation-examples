@@ -8,12 +8,69 @@ The examples are in either `bash` or `javascript`.
 These scripts are provided as is. For questions, please post in the
 [jupiterone-community #dev][1] Slack workspace.
 
-[1]: https://jupiterone-community.slack.com/messages/CJMV4SFV5
+## Contents
+
+The following is a list of provided examples and their brief summary:
+
+- **Security Assessments and Findings**
+
+  WHERE: see [`/security-assessment`][2] in this repo
+
+  WHAT: documenting manual security testing, assessments, and findings in code
+  (YAML), and publish to JupiterOne graph for central reporting and
+  visualization.
+
+- **Security Assessment Reporting**
+
+  WHERE: see [`/security-assessment-report`][3] in this repo
+
+  WHAT: query for any assessment object from JupiterOne and its findings to
+  generate a PDF document as output.
+
+- **Third Party Vendors**
+
+  WHERE: see [`/vendor-management`][4] in this repo
+
+  WHAT: documenting details about each third party vendor in code (YAML),
+  including security review status, vendor managers, who has access, etc.
+
+- **Detect Leaked Secrets in Code**
+
+  WHERE: see [`/gitleaks-findings`][5] in this repo
+
+  WHAT: a tool using the `gitleaks` open source utility to automate detection of
+  leaked secrets in your code repos and publish the findings to your JupiterOne
+  graph for reporting and visualization.
+
+- **Template for Security and Privacy Design**
+
+  WHERE: see [`security-privacy-design`][6] in this repo
+
+  WHAT: A template that includes sections for security and privacy
+  considerations for use with engineering team to integrate security early in
+  the product/feature design phase.
+
+- **Map Repo Dependencies**
+
+  WHERE: see separate [`map-repo-dependencies`][7] repo
+
+  WHAT: automation script that reads the package files (e.g. `package.json`) in
+  your local code repos to create entities and relationships in your JupiterOne
+  graph, so that you can query and visualize how your code depends on each other.
+
+- **Detect and Alert on Specific PRs**
+
+  WHERE: see separate [`bitbucket-pr-detector`][8] repo
+
+  WHAT: Detect particular kind of pull requests (for example, a RFC document for
+  a new product feature that includes security and privacy considerations) and
+  alert the security team about it.
 
 ## Prerequisites and dependencies
 
-You will need `jupiterone-client-nodejs`. It has been added as a dependency to
-this project. You can also install it globally:
+For most of the examples and templates included in this repo, you will need
+`jupiterone-client-nodejs`. It has been added as a dependency to this project.
+You can also install it globally:
 
 ```bash
 npm install @jupiterone/jupiterone-client-nodejs -g
@@ -26,77 +83,11 @@ J1_ACCOUNT_ID=yourAccountId
 J1_API_TOKEN=yourToken
 ```
 
-## Documenting security assessment findings
-
-`/security-assessment`
-
-- Write your lightweight assessment report and findings in YAML
-- Run `publish.sh` to upload the entities to your JupiterOne account
-- See the results with a J1QL query like this:
-
-  ```j1ql
-  Find Assessment that identified (Risk|Finding) return tree
-  ```
-
-More information:
-
-- https://support.jupiterone.io/hc/en-us/articles/360022721954-SecOps-Artifacts-as-Code
-
-## Generating a PDF report from an assessment
-
-`/security-assessment-report`
-
-Run the following command from the above directory to generate a Markdown and a
-PDF report of a security assessment by name, including all findings/risks
-identified by the assessment.
-
-```bash
-export $(grep -v '^#' ../.env | xargs)
-node generate-assessment-report.js --assessment 'name-of-the-assessment'
-```
-
-The `name-of-the-assessment` should match the value of `name` property of an
-existing `Assessment` entity in your J1 account.
-
-## Maintaining details about third-party vendors and accounts
-
-`/vendor-management`
-
-As part of your organization's third-party vendor management process, you will
-most likely need to keep track of the details of each vendor, links to
-contracts and agreements, and the accounts and users associated with each vendor.
-
-If you use SAML Single Sign On (SSO) for your SaaS accounts and your SSO
-provider has an integration with JupiterOne (e.g. Okta, OneLogin), the vendors
-are mapped/inferred through the SSO app configuration.
-
-For additional vendors, you can provide the details in a YAML file as shown in
-the examples in this repo, and publish them to your JupiterOne account.
-
-This way, you can leverage pull requests to serve as the vendor review/approval
-process. The PR can also be the trigger for a security team member to conduct
-more detailed vendor risk assessment, and provide a link to the
-report/questionnaire as part of the vendor entity YAML.
-
-**Entities:**
-
-Each example vendor YAML file contains two "classes" of entity objects:
-
-- `Vendor`: an entity representing the vendor itself.
-- `Account`: one or more entities that represent the account(s) hosted by
-  this vendor that users can log in to.
-
-**Relationships:**
-
-`Vendor -HOSTS-> Account`
-
-When these entities are published to JupiterOne, a relationship between the
-vendor and its accounts are automatically created, as long as the value of the
-`vendor` property on the `Account` entity object matches the `name` of the
-`Vendor`.
-
-`Person -MANAGES-> Vendor`
-
-Additionally, if there are `Person` entities within your JupiterOne account,
-and their email addresses match the ones configured as `owners` on the `Vendor`
-entity, a relationship will be automatically created between them.
+[1]: https://jupiterone-community.slack.com/messages/CJMV4SFV5
+[2]: ./security-assessment/README.md
+[3]: ./security-assessment-report/README.md
+[4]: ./vendor-management/README.md
+[5]: ./gitleaks-findings/README.md
+[6]: ./security-privacy-design/rfc-template.md
+[7]: https://github.com/JupiterOne/map-repo-dependencies
+[8]: https://github.com/JupiterOne/bitbucket-pr-detector
