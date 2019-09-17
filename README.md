@@ -44,9 +44,9 @@ The following is a list of provided examples and their brief summary:
 
 - **Template for Security and Privacy Design**
 
-  WHERE: see [`security-privacy-design`][6] in this repo
+  WHERE: see [`/security-privacy-design`][6] in this repo
 
-  WHAT: A template that includes sections for security and privacy
+  WHAT: a template that includes sections for security and privacy
   considerations for use with engineering team to integrate security early in
   the product/feature design phase.
 
@@ -62,9 +62,19 @@ The following is a list of provided examples and their brief summary:
 
   WHERE: see separate [`bitbucket-pr-detector`][8] repo
 
-  WHAT: Detect particular kind of pull requests (for example, a RFC document for
+  WHAT: detect particular kind of pull requests (for example, a RFC document for
   a new product feature that includes security and privacy considerations) and
   alert the security team about it.
+
+- **Enforce Code Review and Security Policies in CICD**
+
+  WHERE: see separate [`change-management-client`][9] repo
+  
+  WHAT: a package that can help you automate the enforcement of code review and
+  security policies regarding pull request approval, author and reviewer
+  validation, and vulnerability checks by collecting and analyzing data from the
+  JupiterOne graph. For an example of its usage, check out the
+  [`change-management-example`][10] repo.
 
 ## Prerequisites and dependencies
 
@@ -91,3 +101,5 @@ J1_API_TOKEN=yourToken
 [6]: ./security-privacy-design/rfc-template.md
 [7]: https://github.com/JupiterOne/map-repo-dependencies
 [8]: https://github.com/JupiterOne/bitbucket-pr-detector
+[9]: https://github.com/JupiterOne/change-management-client
+[10]: https://github.com/JupiterOne/change-management-example
