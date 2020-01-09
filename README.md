@@ -42,6 +42,13 @@ The following is a list of provided examples and their brief summary:
   leaked secrets in your code repos and publish the findings to your JupiterOne
   graph for reporting and visualization.
 
+- **Ingest Vuls.io Findings**
+
+  WHERE: see [`/vuls-findings`][11] in this repo
+
+  WHAT: a tool for ingesting the output of the `vuls` scan reports into  JupiterOne
+  graph for reporting and visualization.
+
 - **Template for Security and Privacy Design**
 
   WHERE: see [`/security-privacy-design`][6] in this repo
@@ -69,7 +76,7 @@ The following is a list of provided examples and their brief summary:
 - **Enforce Code Review and Security Policies in CICD**
 
   WHERE: see separate [`change-management-client`][9] repo
-  
+
   WHAT: a package that can help you automate the enforcement of code review and
   security policies regarding pull request approval, author and reviewer
   validation, and vulnerability checks by collecting and analyzing data from the
@@ -103,3 +110,4 @@ J1_API_TOKEN=yourToken
 [8]: https://github.com/JupiterOne/bitbucket-pr-detector
 [9]: https://github.com/JupiterOne/change-management-client
 [10]: https://github.com/JupiterOne/change-management-example
+[11]: ./vuls-findings/README.md
