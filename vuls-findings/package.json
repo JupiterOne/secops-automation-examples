@@ -1,0 +1,16 @@
+{
+  "name": "jupiter-vuls-ingest",
+  "version": "1.0.0",
+  "description": "",
+  "main": "j1-ingest.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@jupiterone/jupiterone-client-nodejs": "^0.13.5",
+    "dotenv": "^8.2.0"
+  },
+  "devDependencies": {}
+}
