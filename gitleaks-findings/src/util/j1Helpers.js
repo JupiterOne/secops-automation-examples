@@ -1,7 +1,7 @@
 const highSeverityTags = ['Facebook', 'RSA', 'EC', 'Google', 'Twitter', 'NPM'];
 const lowSeverityFilePathFragments = ['test', 'fixture', 'snapshot'];
 
-async function convertJson (gitleaksJson, source, org) {
+async function toFindingEntity(gitleaksJson, source, org) {
   let repoName = gitleaksJson.repo;
   if (gitleaksJson.repo.indexOf('.git') > -1) {
     repoName = gitleaksJson.repo.slice(0, -4); // remove .git suffix, if present
@@ -62,10 +62,10 @@ async function convertJson (gitleaksJson, source, org) {
   return newEntity;
 }
 
-async function convertLeaks (gitleaks, source, org) {
+async function toFindingEntities(gitleaks, source, org) {
   const entities = [];
   for (const obj of gitleaks) {
-    const entity = await convertJson(obj, source, org);
+    const entity = await toFindingEntity(obj, source, org);
     if (entity) {
       entities.push(entity);
     }
@@ -73,7 +73,7 @@ async function convertLeaks (gitleaks, source, org) {
   return entities;
 }
 
-async function createEntities (j1Client, entities) {
+async function createEntities(j1Client, entities) {
   for (const e of entities) {
     const classLabels = Array.isArray(e.entityClass)
       ? e.entityClass
@@ -94,5 +94,5 @@ async function createEntities (j1Client, entities) {
 
 module.exports = {
   createEntities,
-  convertLeaks
+  toFindingEntities
 };
