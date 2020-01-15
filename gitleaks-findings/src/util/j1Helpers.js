@@ -39,6 +39,7 @@ async function convertJson (gitleaksJson, source, org) {
   newEntity.properties.name = `${repoName}-${gitleaksJson.rule}`;
   newEntity.properties.displayName = `${repoName}-${gitleaksJson.rule}`;
   newEntity.properties.repo = repoName;
+  newEntity.properties.targets = repoName;
 
   if (source === 'github') {
     newEntity.properties.coderepo_type = 'github_repo';
@@ -62,14 +63,14 @@ async function convertJson (gitleaksJson, source, org) {
 }
 
 async function convertLeaks (gitleaks, source, org) {
-  var j1Entities = [];
+  const entities = [];
   for (const obj of gitleaks) {
     const entity = await convertJson(obj, source, org);
     if (entity) {
-      j1Entities.push(entity);
+      entities.push(entity);
     }
   }
-  return j1Entities;
+  return entities;
 }
 
 async function createEntities (j1Client, entities) {

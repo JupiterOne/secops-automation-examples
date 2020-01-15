@@ -16,24 +16,24 @@ async function createEntities (j1Client, entities) {
       );
     }
 
-    console.log("Finished creating entities in JupiterOne!!!");
+    console.log("Finished creating entities in JupiterOne.");
 }
 
 async function formEntities(data) {
-    var jsonData = JSON.parse(data);
-    var entitiesToBePushed = [];
+    const jsonData = JSON.parse(data);
+    const entities = [];
   
-    for (var cve in jsonData.scannedCves) {
+    for (const cve in jsonData.scannedCves) {
 
-      var affectedPackages = [];
-      for (var package in jsonData.scannedCves[cve].affectedPackages) {
+      const affectedPackages = [];
+      for (const package in jsonData.scannedCves[cve].affectedPackages) {
         affectedPackages.push(jsonData.scannedCves[cve].affectedPackages[package].name);
       }
 
-      var sev;
-      var cvss2 = 0.0;
-      var cvss3 = 0.0;
-      for (var sevRating in jsonData.scannedCves[cve].cveContents) {
+      let numericSeverity;
+      let cvss2 = 0.0;
+      let cvss3 = 0.0;
+      for (const sevRating in jsonData.scannedCves[cve].cveContents) {
         if (jsonData.scannedCves[cve].cveContents[sevRating].cvss2Score > cvss2) {
           cvss2 = jsonData.scannedCves[cve].cveContents[sevRating].cvss2Score;
         }
@@ -44,47 +44,59 @@ async function formEntities(data) {
       }
 
       if (cvss3 > 0) {
-        sev = cvss3;
+        numericSeverity = cvss3;
       } else {
-        sev = cvss2;
+        numericSeverity = cvss2;
       }
 
-      var severity = ""
-      if (sev < 4.0) {
+      let severity = "";
+      if (numericSeverity < 4.0) {
         severity = "low";
-      } else if (sev < 6.9) {
+      } else if (numericSeverity < 6.9) {
         severity = "medium";
-      } else if (sev < 8.9) {
+      } else if (numericSeverity < 8.9) {
         severity = "high";
       } else {
         severity = "critical";
       }
 
-      var summary = "";
-      for (var cveContent in jsonData.scannedCves[cve].cveContents) {
-        var sum = summary;
+      let summary = "";
+      for (const cveContent in jsonData.scannedCves[cve].cveContents) {
+        const sum = jsonData.scannedCves[cve].cveContents[cveContent].summary;
 
-        summary = jsonData.scannedCves[cve].cveContents[cveContent].summary;
-        if ((sum.length !== 0) && (summary.length > sum.length)) {
+        if (sum && sum.length > summary.length) {
             summary = sum;
         }
-
       }
 
+      const instanceId = 
+        jsonData.platform.instanceID.length > 0 && jsonData.platform.instanceID;
+      const containerId = 
+        jsonData.container.containerID.length > 0 && jsonData.container.containerID;
+      const serverUUID = 
+        jsonData.serverUUID.length > 0 && jsonData.serverUUID;
+      const targets = 
+        instanceId || containerId || serverUUID || jsonData.ipv4Addrs;
   
-      var entityProperties = {};
-      entityProperties.cve = cve;
-      entityProperties.serverName = jsonData.serverName;
-      entityProperties.platform_name = jsonData.platform.name;
-      entityProperties.platform_instanceID = jsonData.platform.instanceID;
-      entityProperties.affectedPackages = affectedPackages;
-      entityProperties.displayName = `vuls-finding-${jsonData.serverName}-${jsonData.release}-${cve}`;
-      entityProperties.release = jsonData.release;
-      entityProperties.family = jsonData.family;
-      entityProperties.cvss = sev;
-      entityProperties.summary = summary;
-      entityProperties.severity = severity;
-  
+      const entityProperties = {
+        displayName: `vuls-finding-${jsonData.serverName}-${jsonData.release}-${cve}`,
+        cve,
+        cvss: numericSeverity,
+        cvss2,
+        cvss3,
+        numericSeverity,
+        summary,
+        severity,
+        serverName: jsonData.serverName,
+        platform: jsonData.platform.name,
+        instanceId,
+        containerId,
+        affectedPackages: affectedPackages,
+        release: jsonData.release,
+        family: jsonData.family,
+        targets,
+        createdOn: jsonData.reportedAt,
+      };
   
       const newEntity = {
         entityKey: `vuls-finding-${jsonData.serverName}-${jsonData.release}-${cve}`,
@@ -93,15 +105,14 @@ async function formEntities(data) {
         properties: entityProperties
       };
   
-      entitiesToBePushed.push(newEntity);
-  
+      entities.push(newEntity);
     }
   
-    return entitiesToBePushed;
+    return entities;
   }
 
 
 module.exports = {
-    createEntities,
-    formEntities
-  };
+  createEntities,
+  formEntities
+};
