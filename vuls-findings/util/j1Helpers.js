@@ -19,7 +19,7 @@ async function createEntities (j1Client, entities) {
     console.log("Finished creating entities in JupiterOne.");
 }
 
-async function formEntities(data) {
+async function toFindingEntities(data) {
     const jsonData = JSON.parse(data);
     const entities = [];
   
@@ -114,5 +114,5 @@ async function formEntities(data) {
 
 module.exports = {
   createEntities,
-  formEntities
+  toFindingEntities
 };

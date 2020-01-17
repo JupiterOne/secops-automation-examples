@@ -2,7 +2,7 @@
 require('dotenv').config()
 
 const JupiterOneClient = require('@jupiterone/jupiterone-client-nodejs');
-const { createEntities, formEntities } = require('./util/j1Helpers');
+const { createEntities, toFindingEntities } = require('./util/j1Helpers');
 
 
 function gatherConfig () {
@@ -22,22 +22,22 @@ function gatherConfig () {
 
 async function ingestData(data) {
   const config = gatherConfig();
-  var j1Client = new JupiterOneClient({ account: config.j1Account, accessToken: config.j1AccessToken, dev: (config.dev === 'true') });
-  j1Client = await j1Client.init();
+  const j1Client = 
+    await new JupiterOneClient({
+      account: config.j1Account, 
+      accessToken: config.j1AccessToken, 
+      dev: (config.dev === 'true') 
+    }).init();
 
+  const newEntities = await toFindingEntities(data);
 
-  var entities = await formEntities(data);
-
-  console.log(entities);
-
-  createEntities(j1Client, entities);
-
+  createEntities(j1Client, newEntities);
 }
 
 
 async function run () {
-  var stdin = process.openStdin();
-  var data = "";
+  const stdin = process.openStdin();
+  let data = "";
 
   stdin.on('data', function(chunk) {
     data += chunk;
@@ -48,7 +48,5 @@ async function run () {
   });
 
 }
-
-
 
 run().catch(console.error);
