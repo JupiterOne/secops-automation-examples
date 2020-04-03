@@ -36,7 +36,7 @@ The following is a list of provided examples and their brief summary:
 
 - **Detect Leaked Secrets in Code**
 
-  WHERE: see [`/gitleaks-findings`][5] in this repo
+  WHERE: see [`graph-gitleaks-findings`][5] repo
 
   WHAT: a tool using the `gitleaks` open source utility to automate detection of
   leaked secrets in your code repos and publish the findings to your JupiterOne
@@ -44,7 +44,7 @@ The following is a list of provided examples and their brief summary:
 
 - **Ingest Vuls.io Findings**
 
-  WHERE: see [`/vuls-findings`][11] in this repo
+  WHERE: see [`graph-vuls-findings`][11] repo
 
   WHAT: a tool for ingesting the output of the `vuls` scan reports into  JupiterOne
   graph for reporting and visualization.
@@ -73,7 +73,7 @@ The following is a list of provided examples and their brief summary:
   a new product feature that includes security and privacy considerations) and
   alert the security team about it.
 
-- **Enforce Code Review and Security Policies in CICD**
+- **Enforce Code Review and Security Policies in CI/CD**
 
   WHERE: see separate [`change-management-client`][9] repo
 
@@ -104,10 +104,10 @@ J1_API_TOKEN=yourToken
 [2]: ./security-assessment/README.md
 [3]: ./security-assessment-report/README.md
 [4]: ./vendor-management/README.md
-[5]: ./gitleaks-findings/README.md
+[5]: https://github.com/JupiterOne/graph-gitleaks-findings
 [6]: ./security-privacy-design/rfc-template.md
 [7]: https://github.com/JupiterOne/map-repo-dependencies
 [8]: https://github.com/JupiterOne/bitbucket-pr-detector
 [9]: https://github.com/JupiterOne/change-management-client
 [10]: https://github.com/JupiterOne/change-management-example
-[11]: ./vuls-findings/README.md
+[11]: https://github.com/JupiterOne/graph-vuls-findings
