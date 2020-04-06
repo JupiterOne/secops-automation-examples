@@ -34,21 +34,6 @@ The following is a list of provided examples and their brief summary:
   WHAT: documenting details about each third party vendor in code (YAML),
   including security review status, vendor managers, who has access, etc.
 
-- **Detect Leaked Secrets in Code**
-
-  WHERE: see [`graph-gitleaks-findings`][5] repo
-
-  WHAT: a tool using the `gitleaks` open source utility to automate detection of
-  leaked secrets in your code repos and publish the findings to your JupiterOne
-  graph for reporting and visualization.
-
-- **Ingest Vuls.io Findings**
-
-  WHERE: see [`graph-vuls-findings`][11] repo
-
-  WHAT: a tool for ingesting the output of the `vuls` scan reports into  JupiterOne
-  graph for reporting and visualization.
-
 - **Template for Security and Privacy Design**
 
   WHERE: see [`/security-privacy-design`][6] in this repo
@@ -83,6 +68,30 @@ The following is a list of provided examples and their brief summary:
   JupiterOne graph. For an example of its usage, check out the
   [`change-management-example`][10] repo.
 
+## Example custom integrations for on-prem resources / internal operations
+
+- **Discover local/on-prem devices using Nmap**
+
+  WHERE: see [`graph-nmap`][12] repo
+
+  WHAT: using `Nmap` to scan local networks to discover on-prem devices and
+  create entities to push to JupiterOne graph.
+
+- **Detect Leaked Secrets in Code**
+
+  WHERE: see [`graph-gitleaks-findings`][5] repo
+
+  WHAT: a tool using the `gitleaks` open source utility to automate detection of
+  leaked secrets in your code repos and publish the findings to your JupiterOne
+  graph for reporting and visualization.
+
+- **Ingest Vuls.io Findings**
+
+  WHERE: see [`graph-vuls-findings`][11] repo
+
+  WHAT: a tool for ingesting the output of the `vuls` scan reports into  JupiterOne
+  graph for reporting and visualization.
+
 ## Prerequisites and dependencies
 
 For most of the examples and templates included in this repo, you will need
@@ -111,3 +120,4 @@ J1_API_TOKEN=yourToken
 [9]: https://github.com/JupiterOne/change-management-client
 [10]: https://github.com/JupiterOne/change-management-example
 [11]: https://github.com/JupiterOne/graph-vuls-findings
+[12]: https://github.com/JupiterOne/graph-nmap
