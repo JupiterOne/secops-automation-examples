@@ -89,8 +89,16 @@ The following is a list of provided examples and their brief summary:
 
   WHERE: see [`graph-vuls-findings`][11] repo
 
-  WHAT: a tool for ingesting the output of the `vuls` scan reports into  JupiterOne
+  WHAT: a tool for ingesting the output of the `vuls` scan reports into JupiterOne
   graph for reporting and visualization.
+  
+- **Map DNS records to their targets via Shodan data**
+
+  WHERE: see [`nslookup-shodan`][13] repo
+  
+  WHAT: An automation script to enrich the domain records mapping in a JupiterOne graph.
+  Identifies domain records that do not already point to a known internal asset, discovers
+  the asset via Shodan, and maps the record to the target host.
 
 ## Prerequisites and dependencies
 
@@ -121,3 +129,4 @@ J1_API_TOKEN=yourToken
 [10]: https://github.com/JupiterOne/change-management-example
 [11]: https://github.com/JupiterOne/graph-vuls-findings
 [12]: https://github.com/JupiterOne/graph-nmap
+[13]: https://github.com/JupiterOne/nslookup-shodan
