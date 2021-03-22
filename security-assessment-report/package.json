@@ -1,0 +1,10 @@
+{
+  "name": "assessments",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@jupiterone/jupiterone-client-nodejs": "^0.23.0",
+    "markdown-pdf": "^10.0.0"
+  }
+}

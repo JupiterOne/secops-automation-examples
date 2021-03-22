@@ -1,17 +1,13 @@
 'use strict';
 
-const JupiterOneClient = require('@jupiterone/jupiterone-client-nodejs');
+const { JupiterOneClient } = require('@jupiterone/jupiterone-client-nodejs');
 const program = require('commander');
 const fs = require('fs');
 const pdf = require("markdown-pdf");
 
 const {
-  J1_USER_POOL_ID: poolId,
-  J1_CLIENT_ID: clientId,
-  J1_ACCOUNT_ID: account,
+  J1_ACCOUNT: account,
   J1_API_TOKEN: accessToken,
-  J1_USERNAME: username,
-  J1_PASSWORD: password
 } = process.env;
 
 function parseArrayString(text) {
@@ -34,10 +30,8 @@ async function main() {
     .option('--assessment <name>', 'The name an assessment entity in J1.')
     .parse(process.argv);
 
-  const j1Client =
-    await (new JupiterOneClient(
-      { account, username, password, poolId, clientId, accessToken }
-    )).init();
+  const j1Client = new JupiterOneClient({ account, accessToken });
+  await j1Client.init();
 
   // Query J1 for the assessment with name provided as input
   const query = `Find Assessment with name='${program.assessment}'`;
@@ -71,13 +65,13 @@ async function main() {
 
         for (const f of findings) {
           if (f.entity && f.properties) {
-            const score = 
+            const score =
               f.properties.numericSeverity ? `(score: ${f.properties.numericSeverity})` : '';
-            const summary = 
+            const summary =
               f.properties.summary ? `${f.properties.summary}\n\n` : '';
-            const steps = 
-              f.properties.stepsToReproduce 
-                ? '**Steps to Reproduce:**\n\n' + parseArrayString(f.properties.stepsToReproduce) + '\n\n' 
+            const steps =
+              f.properties.stepsToReproduce
+                ? '**Steps to Reproduce:**\n\n' + parseArrayString(f.properties.stepsToReproduce) + '\n\n'
                 : '';
             const findingOverview =
               `### ${f.entity.displayName}\n\n` +
@@ -110,7 +104,7 @@ async function main() {
       }
 
       // Generate Markdown and PDF files
-      const output = 
+      const output =
         reportOverview + reportFindingsTOC.join('') + reportFindings.join('');
       const reportFilename = `report-${a.id}`;
       fs.writeFileSync(`./${reportFilename}.md`, output);
