@@ -133,11 +133,11 @@ async function run (baseDir): Promise<void> {
           'npm_package', //_type
           'CodeModule', //_class
           {
-            owner: 'jupiterone',
             displayName: dep.name,
-            name: dep.name,
+            fullName: dep.name,
+            name: dep.name.split('/').pop(),
             license: dep.license,
-            integrationSource: 'custom'
+            scope: dep.name.split('/')[0].replace(/^@/,''),
           }
         );
       }, attemptOptions);
@@ -154,7 +154,8 @@ async function run (baseDir): Promise<void> {
         {
           displayName: `${repoName}:USES:${dep.name}`,
           directDependency: dep.direct,
-          devDependency: Object.keys(repoPkg.devDependencies).includes(dep.name)
+          devDependency: Object.keys(repoPkg.devDependencies).includes(dep.name),
+          version: dep.version,
         }
       );
     }, attemptOptions);
