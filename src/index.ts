@@ -8,6 +8,9 @@ require("dotenv").config();
     account: process.env.J1_ACCOUNT,
   });
 
+  const query = `source .env && J1_DEV_ENABLED=true yarn j1 -a j1dev -k "$J1_API_TOKEN" -q "Find (Function|Task) 
+  with displayName = 'jupiter-query-service' that relates to as rx * where rx.pseudoRelationship = true return rx.*"`
+
   const results = await j1Client.queryV1(`
   Find (Function|Task) with displayName = 'jupiter-query-service' as f1 
   THAT ASSIGNED AccessRole 
@@ -32,7 +35,7 @@ require("dotenv").config();
       sinkClass,
       sinkName,
     } = result;
-    const relVerb = (sinkClass as any[])?.includes("Database") ? "ACCESSES" : "EXECUTES";
+    const relVerb = (sinkClass as string[])?.includes("Database") ? "ACCESSES" : "EXECUTES";
     const relationshipKey =
       sourceKey + "|" + relVerb.toLowerCase() + "|" + sinkKey;
     const relationshipType =

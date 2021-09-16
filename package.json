@@ -1,4 +1,15 @@
 {
+<<<<<<< HEAD
+=======
+  "name": "jupiter-repo-dependencies",
+  "description": "",
+  "version": "1.0.0",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "./tools/bin/run-create-relationships",
+    "delete": "./tools/bin/delete-pseudo-relationships"
+  },
+>>>>>>> 06ca330 (Delete script for the relationships)
   "dependencies": {
     "@jupiterone/jupiterone-client-nodejs": "^0.11.3",
     "commander": "^2.20.0",

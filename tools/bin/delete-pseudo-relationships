@@ -1,0 +1,9 @@
+source .env && J1_DEV_ENABLED=true yarn j1 -a j1dev -k "$J1_API_TOKEN" -q "Find (Function|Task) 
+  with displayName = 'jupiter-query-service' that relates to as rx * where rx.pseudoRelationship = true return 
+  rx._type as relationshipType,
+  rx._class as relationshipClass,
+  rx._fromEntityId as fromEntityId,
+  rx._toEntityId as toEntityId,
+  rx._key as relationshipKey"
+
+source .env && J1_DEV_ENABLED=true yarn j1 -a j1dev -k "$J1_API_TOKEN" -o delete --relationship --hard-delete -f ./results.json 
