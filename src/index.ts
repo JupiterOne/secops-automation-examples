@@ -1,7 +1,11 @@
 import { fstat } from "fs";
 import { BuildPayloadInput } from "./build-payload";
 import { getClient } from "./get-client";
-import { buildPayload } from './build-payload';
+import { buildPayload } from "./build-payload";
+import { RelationshipForSync } from "@jupiterone/jupiterone-client-nodejs/dist/types";
+import { SyncJobStatus } from "@jupiterone/jupiterone-client-nodejs";
+import { sleep } from "@lifeomic/attempt";
+import { waitForJobFinalization } from "./wait-for-job";
 
 require("dotenv").config();
 
@@ -12,7 +16,7 @@ require("dotenv").config();
   });
 
   const results = await j1Client.queryV1(`
-  Find (Function|Task) as f1 
+  Find (Function|Task) with displayName = 'jupiter-query-service' as f1 
   THAT ASSIGNED AccessRole 
   THAT ASSIGNED AccessPolicy 
   THAT ALLOWS (Function|Task|Database) as f2
@@ -33,9 +37,17 @@ require("dotenv").config();
     return [sinkClass].flat().includes("Database") ? "ACCESSES" : "EXECUTES";
   };
 
-  const payload = buildPayload({data: results, verbCb: makeVerb});
+  const payload = buildPayload({ data: results, verbCb: makeVerb });
 
   console.log(payload);
+
+  const jobState = await j1Client.bulkUpload({
+    scope: "hackathon-2021-relationships-workload-role-policy-workload",
+    relationships: payload,
+  });
+
+  console.log("Polling for job finalization");
+  await waitForJobFinalization(j1Client, jobState.syncJobId);
 })().catch((err) => {
   console.error("", err);
 });

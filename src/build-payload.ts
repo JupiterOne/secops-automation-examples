@@ -17,16 +17,17 @@ export interface BulkUploadOutput {
   _class: string;
   _fromEntityId: string;
   _toEntityId: string;
+  [key: string]: string | boolean;
 }
 
 export const buildPayload = ({
   data,
-  verbCb
+  verbCb,
 }: {
   data: BuildPayloadInput[];
   verbCb: (input: BuildPayloadInput) => string;
 }): BulkUploadOutput[] => {
-  return data.map(input => {
+  return data.map((input) => {
     const {
       sourceId,
       sourceKey,
@@ -37,7 +38,7 @@ export const buildPayload = ({
       sinkKey,
       sinkType,
       sinkClass,
-      sinkName
+      sinkName,
     } = input;
     const relVerb = verbCb(input);
     const relationshipKey =
@@ -50,10 +51,8 @@ export const buildPayload = ({
       _class: relVerb,
       _fromEntityId: sourceId,
       _toEntityId: sinkId,
-      properties: {
-        pseudoRelationship: true,
-        hackathon2021: true
-      }
+      pseudoRelationship: true,
+      hackathon2021: true,
     };
     return payload;
   });
