@@ -12,8 +12,10 @@ require("dotenv").config();
   Find (Function|Task) with displayName = 'jupiter-query-service' as f1 
   THAT ASSIGNED AccessRole 
   THAT ASSIGNED AccessPolicy 
-  THAT ALLOWS (Function|Task|DataStore) as f2
-  RETURN f1.displayName as source, f2.displayName as sink`);
+  THAT ALLOWS (Function|Task|Database) as f2
+  RETURN 
+    f1.displayName as sourceName, f1._id as sourceId, f1._class as sourceClass, f1._type as sourceType,
+    f2.displayName as sinkName, f2._id as sinkId, f2._class as sinkClass, f2._type as sinkType`);
 
   console.log(result);
 })().catch((err) => {
