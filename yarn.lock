@@ -38,10 +38,17 @@
   resolved "https://registry.yarnpkg.com/@jupiterone/jupiterone-alert-rules/-/jupiterone-alert-rules-0.3.0.tgz#224e2e5ab445ef21497e57a4b0cc2f4afc73504b"
   integrity sha512-BDAKVgL7TobJ3PD3Phioa0LgopEHzRelZSgiBjFvAMFR8wiQs4GE/iSt/tVENQP/kKDfQLyM0wiyaJlgdHLyhQ==
 
+<<<<<<< HEAD
 "@jupiterone/jupiterone-client-nodejs@^0.11.3":
   version "0.11.3"
   resolved "https://registry.yarnpkg.com/@jupiterone/jupiterone-client-nodejs/-/jupiterone-client-nodejs-0.11.3.tgz#38d487fdb7739d5e5d8dc4ab25a31e7b84e17917"
   integrity sha512-HbHUO4p7XF/z62grKax/b7x02erQlaneYpCeYokcWNIFi7XWkXyZnVKPaiNzUdIn8wW+DCLCPKwBrAe6a9kJhw==
+=======
+"@jupiterone/jupiterone-client-nodejs@^0.23.4":
+  version "0.23.4"
+  resolved "https://registry.yarnpkg.com/@jupiterone/jupiterone-client-nodejs/-/jupiterone-client-nodejs-0.23.4.tgz#2bc2fa9f9e981f3afed3fe1f53dfda5ec49e25c0"
+  integrity sha512-BCdajnmZxyyhjr/0nOCbGkXcYJyz4ikLYjwANniLCmk1QuD0HBYrsBHIg5/lTSpIPKxWS6VIt2deyJW+DkjI/Q==
+>>>>>>> 3cfce8a (Update to latest client-nodejs)
   dependencies:
     "@jupiterone/jupiterone-alert-rules" "^0.3.0"
     amazon-cognito-identity-js-node "^0.0.3"
