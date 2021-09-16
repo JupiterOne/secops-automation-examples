@@ -20,23 +20,37 @@ require("dotenv").config();
   console.log(results);
 
   for (const result of results) {
-    const { sourceId, sourceKey, sourceType, sourceClass, sourceName, sinkId, sinkKey, sinkType, sinkClass, sinkName } = result;
-    const relVerb = sinkClass === 'Database' ? 'ACCESSES' : 'EXECUTES';
-    const relationshipKey = sourceKey + '|' + relVerb.toLowerCase() + '|' + sinkKey;
-    const relationshipType = sourceType + '_' + relVerb.toLowerCase() + '_' + sinkType;
+    const {
+      sourceId,
+      sourceKey,
+      sourceType,
+      sourceClass,
+      sourceName,
+      sinkId,
+      sinkKey,
+      sinkType,
+      sinkClass,
+      sinkName,
+    } = result;
+    const relVerb = (sinkClass as any[])?.includes("Database") ? "ACCESSES" : "EXECUTES";
+    const relationshipKey =
+      sourceKey + "|" + relVerb.toLowerCase() + "|" + sinkKey;
+    const relationshipType =
+      sourceType + "_" + relVerb.toLowerCase() + "_" + sinkType;
     const relationship = await j1Client.createRelationship(
       relationshipKey,
       relationshipType,
       relVerb,
       sourceId,
       sinkId,
-      { 
+      {
         pseudoRelationship: true,
-        hackathon2021: true 
+        hackathon2021: true,
       }
     );
+
+    console.log(relationship);
   }
- 
 })().catch((err) => {
   console.error("", err);
 });
