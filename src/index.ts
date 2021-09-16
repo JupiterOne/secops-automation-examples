@@ -1,4 +1,5 @@
 import { getClient } from "./get-client";
+const { retry } = require("@lifeomic/attempt");
 
 require("dotenv").config();
 
@@ -19,6 +20,12 @@ require("dotenv").config();
 
   console.log(results);
 
+  const attemptOptions = {
+    delay: 5000,
+    factor: 1.5,
+    maxAttempts: 0,
+    maxDelay: 40000,
+  };
   for (const result of results) {
     const {
       sourceId,
@@ -32,7 +39,9 @@ require("dotenv").config();
       sinkClass,
       sinkName,
     } = result;
-    const relVerb = [sinkClass].flat().includes("Database") ? "ACCESSES" : "EXECUTES";
+    const relVerb = [sinkClass].flat().includes("Database")
+      ? "ACCESSES"
+      : "EXECUTES";
     const relationshipKey =
       sourceKey + "|" + relVerb.toLowerCase() + "|" + sinkKey;
     const relationshipType =
@@ -46,22 +55,23 @@ require("dotenv").config();
       properties: {
         pseudoRelationship: true,
         hackathon2021: true,
-      }
+      },
     };
     // console.log(payload);
 
-    const relationship = await j1Client.createRelationship(
-      relationshipKey,
-      relationshipType,
-      relVerb,
-      sourceId,
-      sinkId,
-      {
-        pseudoRelationship: true,
-        hackathon2021: true,
-      }
-    );
-
+    const relationship = await retry(() => {
+      return j1Client.createRelationship(
+        relationshipKey,
+        relationshipType,
+        relVerb,
+        sourceId,
+        sinkId,
+        {
+          pseudoRelationship: true,
+          hackathon2021: true,
+        }
+      );
+    }, attemptOptions);
     console.log(relationship);
   }
 
