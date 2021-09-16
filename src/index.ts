@@ -4,12 +4,12 @@ require("dotenv").config();
 
 (async () => {
   const j1Client = await getClient({
-    accessToken: process.env.J1_API_TOKEN,
-    account: process.env.J1_ACCOUNT,
+    accessToken: process.env.J1_API_TOKEN!,
+    account: process.env.J1_ACCOUNT!,
   });
 
   const results = await j1Client.queryV1(`
-  Find (Function|Task) with displayName = 'jupiter-query-service' as f1 
+  Find (Function|Task) as f1 
   THAT ASSIGNED AccessRole 
   THAT ASSIGNED AccessPolicy 
   THAT ALLOWS (Function|Task|Database) as f2
@@ -37,6 +37,19 @@ require("dotenv").config();
       sourceKey + "|" + relVerb.toLowerCase() + "|" + sinkKey;
     const relationshipType =
       sourceType + "_" + relVerb.toLowerCase() + "_" + sinkType;
+    const payload = {
+      relationshipKey,
+      relationshipType,
+      relVerb,
+      sourceId,
+      sinkId,
+      properties: {
+        pseudoRelationship: true,
+        hackathon2021: true,
+      }
+    };
+    // console.log(payload);
+
     const relationship = await j1Client.createRelationship(
       relationshipKey,
       relationshipType,
@@ -51,6 +64,8 @@ require("dotenv").config();
 
     console.log(relationship);
   }
+
+  console.log(results.length);
 })().catch((err) => {
   console.error("", err);
 });

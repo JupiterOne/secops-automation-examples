@@ -2,7 +2,7 @@ import { JupiterOneClient } from "@jupiterone/jupiterone-client-nodejs";
 
 // const JupiterOneClient = require('@jupiterone/jupiterone-client-nodejs');
 
-export async function getClient(clientInput: { account; accessToken }) {
+export async function getClient(clientInput: { account: string, accessToken: string }) {
   const account =
     clientInput.account === "" ? process.env.J1_ACCOUNT : clientInput.account;
   const accessToken =
