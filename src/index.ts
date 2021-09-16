@@ -1,5 +1,7 @@
+import { fstat } from "fs";
+import { BuildPayloadInput } from "./build-payload";
 import { getClient } from "./get-client";
-const { retry } = require("@lifeomic/attempt");
+import { buildPayload } from './build-payload';
 
 require("dotenv").config();
 
@@ -26,56 +28,14 @@ require("dotenv").config();
     maxAttempts: 0,
     maxDelay: 40000,
   };
-  for (const result of results) {
-    const {
-      sourceId,
-      sourceKey,
-      sourceType,
-      sourceClass,
-      sourceName,
-      sinkId,
-      sinkKey,
-      sinkType,
-      sinkClass,
-      sinkName,
-    } = result;
-    const relVerb = [sinkClass].flat().includes("Database")
-      ? "ACCESSES"
-      : "EXECUTES";
-    const relationshipKey =
-      sourceKey + "|" + relVerb.toLowerCase() + "|" + sinkKey;
-    const relationshipType =
-      sourceType + "_" + relVerb.toLowerCase() + "_" + sinkType;
-    const payload = {
-      relationshipKey,
-      relationshipType,
-      relVerb,
-      sourceId,
-      sinkId,
-      properties: {
-        pseudoRelationship: true,
-        hackathon2021: true,
-      },
-    };
-    // console.log(payload);
 
-    const relationship = await retry(() => {
-      return j1Client.createRelationship(
-        relationshipKey,
-        relationshipType,
-        relVerb,
-        sourceId,
-        sinkId,
-        {
-          pseudoRelationship: true,
-          hackathon2021: true,
-        }
-      );
-    }, attemptOptions);
-    console.log(relationship);
-  }
+  const makeVerb = ({ sinkClass }: BuildPayloadInput) => {
+    return [sinkClass].flat().includes("Database") ? "ACCESSES" : "EXECUTES";
+  };
 
-  console.log(results.length);
+  const payload = buildPayload({data: results, verbCb: makeVerb});
+
+  console.log(payload);
 })().catch((err) => {
   console.error("", err);
 });

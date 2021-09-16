@@ -24,7 +24,7 @@ export const buildPayload = ({
   verbCb
 }: {
   data: BuildPayloadInput[];
-  verbCb: () => string;
+  verbCb: (input: BuildPayloadInput) => string;
 }): BulkUploadOutput[] => {
   return data.map(input => {
     const {
@@ -39,14 +39,12 @@ export const buildPayload = ({
       sinkClass,
       sinkName
     } = input;
-    const relVerb = [sinkClass].flat().includes("Database")
-      ? "ACCESSES"
-      : "EXECUTES";
+    const relVerb = verbCb(input);
     const relationshipKey =
       sourceKey + "|" + relVerb.toLowerCase() + "|" + sinkKey;
     const relationshipType =
       sourceType + "_" + relVerb.toLowerCase() + "_" + sinkType;
-    const payload2 = {
+    const payload = {
       _key: relationshipKey,
       _type: relationshipType,
       _class: relVerb,
@@ -57,6 +55,6 @@ export const buildPayload = ({
         hackathon2021: true
       }
     };
-    return payload2;
+    return payload;
   });
 };
