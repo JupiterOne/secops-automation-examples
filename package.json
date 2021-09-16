@@ -14,6 +14,22 @@
     "@jupiterone/jupiterone-client-nodejs": "^0.11.3",
     "commander": "^2.20.0",
     "dotenv": "^8.0.0",
+<<<<<<< HEAD
     "markdown-pdf": "^10.0.0"
+=======
+    "esm": "^3.2.25",
+    "graphql": "^14.4.2",
+    "graphql-tag": "^2.10.1",
+    "read-yaml": "^1.1.0",
+    "readline-sync": "^1.4.10"
+  },
+  "devDependencies": {
+    "@types/graphql": "^14.2.3",
+    "@types/node": "^12.7.0",
+    "prettier": "1.18.2",
+    "ts-node": "^10.2.1",
+    "tslint": "^5.18.0",
+    "typescript": "^3.5.3"
+>>>>>>> c042b22 (Fix array coercion)
   }
 }

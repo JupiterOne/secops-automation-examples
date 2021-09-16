@@ -32,7 +32,7 @@ require("dotenv").config();
       sinkClass,
       sinkName,
     } = result;
-    const relVerb = (sinkClass as string[])?.includes("Database") ? "ACCESSES" : "EXECUTES";
+    const relVerb = [sinkClass].flat().includes("Database") ? "ACCESSES" : "EXECUTES";
     const relationshipKey =
       sourceKey + "|" + relVerb.toLowerCase() + "|" + sinkKey;
     const relationshipType =
