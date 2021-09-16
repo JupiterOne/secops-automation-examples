@@ -6,6 +6,7 @@ import { RelationshipForSync } from "@jupiterone/jupiterone-client-nodejs/dist/t
 import { SyncJobStatus } from "@jupiterone/jupiterone-client-nodejs";
 import { sleep } from "@lifeomic/attempt";
 import { waitForJobFinalization } from "./wait-for-job";
+import { WorkloadAccessExecute } from "./workload-access-execute-query";
 
 require("dotenv").config();
 
@@ -15,16 +16,9 @@ require("dotenv").config();
     account: process.env.J1_ACCOUNT!,
   });
 
-  const results = await j1Client.queryV1(`
-  Find (Function|Task) with displayName = 'jupiter-query-service' as f1 
-  THAT ASSIGNED AccessRole 
-  THAT ASSIGNED AccessPolicy 
-  THAT ALLOWS (Function|Task|Database) as f2
-  RETURN 
-    f1.displayName as sourceName, f1._id as sourceId, f1._class as sourceClass, f1._type as sourceType, f1._key as sourceKey,
-    f2.displayName as sinkName, f2._id as sinkId, f2._class as sinkClass, f2._type as sinkType, f2._key as sinkKey`);
+  const results = await WorkloadAccessExecute.query(j1Client);
 
-  console.log(results);
+  //console.log(results);
 
   const attemptOptions = {
     delay: 5000,
@@ -33,11 +27,11 @@ require("dotenv").config();
     maxDelay: 40000,
   };
 
-  const makeVerb = ({ sinkClass }: BuildPayloadInput) => {
-    return [sinkClass].flat().includes("Database") ? "ACCESSES" : "EXECUTES";
-  };
-
-  const payload = buildPayload({ data: results, verbCb: makeVerb });
+  const payload = buildPayload({
+    data: results,
+    verbCb: WorkloadAccessExecute.makeVerb,
+    relationshipPropsCb: WorkloadAccessExecute.relationshipPropsCb,
+  });
 
   console.log(payload);
 
@@ -48,6 +42,6 @@ require("dotenv").config();
 
   console.log("Polling for job finalization");
   await waitForJobFinalization(j1Client, jobState.syncJobId);
-})().catch((err) => {
+})().catch(err => {
   console.error("", err);
 });

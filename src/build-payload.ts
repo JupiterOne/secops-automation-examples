@@ -2,13 +2,10 @@ export interface BuildPayloadInput {
   sourceId: string;
   sourceKey: string;
   sourceType: string;
-  sourceClass: string;
-  sourceName: string;
   sinkId: string;
   sinkKey: string;
   sinkType: string;
   sinkClass: string;
-  sinkName: string;
 }
 
 export interface BulkUploadOutput {
@@ -20,31 +17,30 @@ export interface BulkUploadOutput {
   [key: string]: string | boolean;
 }
 
-export const buildPayload = ({
+export const buildPayload = <T extends BuildPayloadInput>({
   data,
   verbCb,
+  relationshipPropsCb,
 }: {
-  data: BuildPayloadInput[];
-  verbCb: (input: BuildPayloadInput) => string;
+  data: T[];
+  verbCb: (input: T) => string;
+  relationshipPropsCb: (input: T) => Record<string, string>;
 }): BulkUploadOutput[] => {
-  return data.map((input) => {
+  return data.map(input => {
     const {
       sourceId,
       sourceKey,
       sourceType,
-      sourceClass,
-      sourceName,
       sinkId,
       sinkKey,
       sinkType,
-      sinkClass,
-      sinkName,
     } = input;
     const relVerb = verbCb(input);
     const relationshipKey =
       sourceKey + "|" + relVerb.toLowerCase() + "|" + sinkKey;
     const relationshipType =
       sourceType + "_" + relVerb.toLowerCase() + "_" + sinkType;
+
     const payload = {
       _key: relationshipKey,
       _type: relationshipType,
@@ -53,6 +49,7 @@ export const buildPayload = ({
       _toEntityId: sinkId,
       pseudoRelationship: true,
       hackathon2021: true,
+      ...relationshipPropsCb(input),
     };
     return payload;
   });
