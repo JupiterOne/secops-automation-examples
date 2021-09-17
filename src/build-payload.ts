@@ -2,6 +2,7 @@ export interface BuildPayloadInput {
   sourceId: string;
   sourceKey: string;
   sourceType: string;
+  sourceClass: string;
   sinkId: string;
   sinkKey: string;
   sinkType: string;

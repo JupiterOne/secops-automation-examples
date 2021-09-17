@@ -6,8 +6,10 @@
   "version": "1.0.0",
   "license": "UNLICENSED",
   "scripts": {
-    "start": "./tools/bin/run-create-relationships",
-    "delete": "./tools/bin/delete-pseudo-relationships"
+    "delete": "./tools/bin/delete-pseudo-relationships",
+    "start": "ts-node src/index-queue.ts",
+    "start:queue": "ts-node src/index-queue.ts",
+    "start:queue-v2": "ts-node src/index-queueV2.ts"
   },
 >>>>>>> 06ca330 (Delete script for the relationships)
   "dependencies": {
