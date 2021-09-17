@@ -11,7 +11,7 @@ export class WorkloadAccessExecute {
     client: JupiterOneClient,
   ): Promise<IWorkloadAccessExecute[]> {
     const results = await client.queryV1(`
-  Find (Function|Task) with displayName='jupiter-query-service' as f1 
+  Find (Function|Task) as f1 
   THAT ASSIGNED AccessRole as ar
   THAT ASSIGNED AccessPolicy as ap
   THAT ALLOWS (Function|Task|Database) as f2
