@@ -1,10 +1,5 @@
-import { fstat } from "fs";
-import { BuildPayloadInput } from "./build-payload";
 import { getClient } from "./get-client";
 import { buildPayload } from "./build-payload";
-import { RelationshipForSync } from "@jupiterone/jupiterone-client-nodejs/dist/types";
-import { SyncJobStatus } from "@jupiterone/jupiterone-client-nodejs";
-import { sleep } from "@lifeomic/attempt";
 import { waitForJobFinalization } from "./wait-for-job";
 import { WorkloadAccessExecute } from "./workload-access-execute-query";
 
@@ -27,7 +22,7 @@ require("dotenv").config();
   console.log(payload);
 
   const jobState = await j1Client.bulkUpload({
-    scope: "hackathon-2021-relationships-workload-role-policy-workload",
+    scope: "summary-relationships-workload-role-policy-workload",
     relationships: payload,
   });
 

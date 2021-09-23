@@ -4,9 +4,8 @@
   "version": "0.0.1",
   "license": "MIT",
   "scripts": {
-    "start": "ts-node src/index-queue.ts",
-    "start:queue": "ts-node src/index-queue.ts",
-    "start:queue-v2": "ts-node src/index-queueV2.ts"
+    "start:executes": "ts-node src/index-executes.ts",
+    "start:notifies": "ts-node src/index-queue.ts"
   },
   "dependencies": {
     "@jupiterone/jupiterone-client-nodejs": "^0.23.4",
@@ -23,7 +22,7 @@
   },
   "devDependencies": {
     "@types/graphql": "^14.2.3",
-    "@types/node": "^12.7.0",
+    "@types/node": "^16.9.6",
     "prettier": "1.18.2",
     "ts-node": "^10.2.1",
     "tslint": "^5.18.0",

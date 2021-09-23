@@ -48,8 +48,7 @@ export const buildPayload = <T extends BuildPayloadInput>({
       _class: relVerb,
       _fromEntityId: sourceId,
       _toEntityId: sinkId,
-      pseudoRelationship: true,
-      hackathon2021: true,
+      summaryRelationship: true,
       ...relationshipPropsCb(input),
     };
     return payload;

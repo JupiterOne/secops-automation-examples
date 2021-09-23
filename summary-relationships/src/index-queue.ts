@@ -2,7 +2,7 @@ import { getClient } from "./get-client";
 import { buildPayload } from "./build-payload";
 import { waitForJobFinalization } from "./wait-for-job";
 import { WorkloadQueueWorkload } from "./workload-queue-workload-query";
-import uniqBy from "lodash.uniqby";
+const uniqBy = require("lodash.uniqby");
 
 require("dotenv").config();
 
@@ -26,7 +26,7 @@ require("dotenv").config();
   console.log(payload);
 
   const jobState = await j1Client.bulkUpload({
-    scope: "hackathon-2021-relationships-workload-queue-workload",
+    scope: "summary-relationships-workload-queue-workload",
     relationships: uniqBy(payload, "_key"),
   });
 
