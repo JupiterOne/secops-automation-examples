@@ -1,51 +1,8 @@
 {
-<<<<<<< HEAD
-=======
-  "name": "jupiter-repo-dependencies",
-  "description": "",
-  "version": "1.0.0",
-  "license": "UNLICENSED",
-  "scripts": {
-    "delete": "./tools/bin/delete-pseudo-relationships",
-    "start": "ts-node src/index-queue.ts",
-    "start:queue": "ts-node src/index-queue.ts",
-    "start:queue-v2": "ts-node src/index-queueV2.ts"
-  },
->>>>>>> 06ca330 (Delete script for the relationships)
   "dependencies": {
-<<<<<<< HEAD
-<<<<<<< HEAD
     "@jupiterone/jupiterone-client-nodejs": "^0.11.3",
-=======
-    "@jupiterone/jupiterone-client-nodejs": "^0.23.0",
-=======
-    "@jupiterone/jupiterone-client-nodejs": "^0.23.4",
->>>>>>> 3cfce8a (Update to latest client-nodejs)
-    "@lifeomic/attempt": "^3.0.0",
-<<<<<<< HEAD
->>>>>>> b7dffda (Add retry to work around rate limiting)
-=======
-    "@types/lodash.uniqby": "^4.7.6",
->>>>>>> 8b1e1a9 (Add lodash.uniqby)
     "commander": "^2.20.0",
     "dotenv": "^8.0.0",
-<<<<<<< HEAD
     "markdown-pdf": "^10.0.0"
-=======
-    "esm": "^3.2.25",
-    "graphql": "^14.4.2",
-    "graphql-tag": "^2.10.1",
-    "lodash.uniqby": "^4.7.0",
-    "read-yaml": "^1.1.0",
-    "readline-sync": "^1.4.10"
-  },
-  "devDependencies": {
-    "@types/graphql": "^14.2.3",
-    "@types/node": "^12.7.0",
-    "prettier": "1.18.2",
-    "ts-node": "^10.2.1",
-    "tslint": "^5.18.0",
-    "typescript": "^3.5.3"
->>>>>>> c042b22 (Fix array coercion)
   }
 }
