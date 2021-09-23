@@ -1,12 +1,6 @@
 node_modules
 .env
-<<<<<<< HEAD
 .DS_Store
-=======
 
 results.json
-<<<<<<< HEAD
->>>>>>> 06ca330 (Delete script for the relationships)
-=======
 bulkDelete.json
->>>>>>> 5735aa8 (Add bulk-delete script for errant relationships)
