@@ -1,0 +1,31 @@
+{
+  "name": "secops-automation-examples_summary-relationships",
+  "description": "simplify complex graph chains with summary relationships",
+  "version": "0.0.1",
+  "license": "MIT",
+  "scripts": {
+    "start:executes": "ts-node src/index-executes.ts",
+    "start:notifies": "ts-node src/index-queue.ts"
+  },
+  "dependencies": {
+    "@jupiterone/jupiterone-client-nodejs": "^0.23.4",
+    "@lifeomic/attempt": "^3.0.0",
+    "@types/lodash.uniqby": "^4.7.6",
+    "commander": "^2.20.0",
+    "dotenv": "^8.0.0",
+    "esm": "^3.2.25",
+    "graphql": "^14.4.2",
+    "graphql-tag": "^2.10.1",
+    "lodash.uniqby": "^4.7.0",
+    "read-yaml": "^1.1.0",
+    "readline-sync": "^1.4.10"
+  },
+  "devDependencies": {
+    "@types/graphql": "^14.2.3",
+    "@types/node": "^16.9.6",
+    "prettier": "1.18.2",
+    "ts-node": "^10.2.1",
+    "tslint": "^5.18.0",
+    "typescript": "^3.5.3"
+  }
+}
