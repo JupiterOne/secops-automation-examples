@@ -1,6 +1,7 @@
 node_modules
 .env
 .DS_Store
+dist
 
 results.json
 bulkDelete.json
