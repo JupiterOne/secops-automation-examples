@@ -53,7 +53,7 @@ async function run (): Promise<void> {
   const components: Component[] = [];
 
   for (const module of modules) {
-    const { name, version, license } = module.properties;
+    const { name, version, license } = module?.properties;
 
     const purl = 'pkg:npm/' + name + '@' + version;
 
