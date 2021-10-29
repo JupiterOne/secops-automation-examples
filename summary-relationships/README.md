@@ -37,7 +37,7 @@ J1_ACCOUNT
 
 or add these variables to a `.env` file
 
-If you are interacting with the dev environment (\*.apps.dev.jupiterone.io), also set an environment variable `J1_DEV`.
+If you are interacting with the dev environment (\*.apps.dev.jupiterone.io), also set an environment variable `J1_DEV_ENABLED`.
 
 ## Running the script
 
