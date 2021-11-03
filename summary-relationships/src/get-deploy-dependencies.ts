@@ -4,8 +4,7 @@ import { paginateRest } from "@octokit/plugin-paginate-rest";
 import { RepoDependencyMapping, RepoDependencyOutput } from './types';
 import { union } from 'lodash';
 import chalk from 'chalk';
-
-require("dotenv").config();
+import 'dotenv/config';
 
 const GITHUB_OWNER = 'JupiterOne';
 const DEPLOY_DEPS_PATH = 'deploy/dependencies.yaml';

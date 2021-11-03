@@ -1,10 +1,8 @@
-// import { dependencyRepos, repoDependencyMappings, allDepRepos } from "./data";
 import { getClient } from "./get-client";
 import { getDeployDependencies } from "./get-deploy-dependencies";
 import { RelationshipForSync } from "@jupiterone/jupiterone-client-nodejs/dist/types";
 import { waitForJobFinalization } from "./wait-for-job";
-
-require("dotenv").config();
+import 'dotenv/config';
 
 function buildRepoQuery(depRepos: string[]): string {
   let query = `FIND CodeRepo WITH tag.AccountName='JupiterOne' AND (`;
