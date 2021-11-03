@@ -5,6 +5,8 @@ import { RepoDependencyMapping, RepoDependencyOutput } from './types';
 import { union } from 'lodash';
 import chalk from 'chalk';
 
+require("dotenv").config();
+
 const GITHUB_OWNER = 'JupiterOne';
 const DEPLOY_DEPS_PATH = 'deploy/dependencies.yaml';
 const DEPLOY_DEPS_REGEX = /(?<=  - ).*/g;
@@ -17,7 +19,7 @@ export async function getDeployDependencies(): Promise<RepoDependencyOutput> {
   
   //setup the github client
   const MyOctokit = Octokit.plugin(restEndpointMethods, paginateRest);
-  const octokit = new MyOctokit({ auth: '' }); 
+  const octokit = new MyOctokit({ auth: process.env.GITHUB_ACCESS_TOKEN }); 
 
   const response = await octokit.paginate(octokit.rest.repos.listForOrg, {
     org: GITHUB_OWNER,
