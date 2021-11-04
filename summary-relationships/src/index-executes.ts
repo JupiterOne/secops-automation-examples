@@ -2,8 +2,8 @@ import { getClient } from "./get-client";
 import { buildPayload } from "./build-payload";
 import { waitForJobFinalization } from "./wait-for-job";
 import { WorkloadAccessExecute } from "./workload-access-execute-query";
-
-require("dotenv").config();
+import { uniqBy } from 'lodash';
+import 'dotenv/config';
 
 (async () => {
   const j1Client = await getClient({
@@ -23,7 +23,7 @@ require("dotenv").config();
 
   const jobState = await j1Client.bulkUpload({
     scope: "summary-relationships-workload-role-policy-workload",
-    relationships: payload,
+    relationships: uniqBy(payload, "_key"),
   });
 
   console.log("Polling for job finalization");

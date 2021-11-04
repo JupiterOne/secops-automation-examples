@@ -3,7 +3,7 @@ set -euo pipefail
 
 [ -f .env ] && source .env
 [ ! -f results.json ] && yarn j1 -a "$J1_ACCOUNT" -k "$J1_API_TOKEN" \
-  -q "Find (Function|Task|Workload) THAT (EXECUTES|ACCESSES|ASYNC_NOTIFIES) as rx (Function|Task|Workload|Database|Queue|Channel) WHERE rx.summaryRelationship = true
+  -q "Find (Function|Task|Workload|CodeRepo) THAT (EXECUTES|ACCESSES|ASYNC_NOTIFIES|USES) as rx (Function|Task|Workload|Database|Queue|Channel|CodeRepo) WHERE rx.summaryRelationship = true
   RETURN
   rx._id as _id,
   rx._type as type"
