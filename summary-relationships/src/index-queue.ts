@@ -2,8 +2,9 @@ import { getClient } from "./get-client";
 import { buildPayload } from "./build-payload";
 import { waitForJobFinalization } from "./wait-for-job";
 import { WorkloadQueueWorkload } from "./workload-queue-workload-query";
-import { uniqBy } from 'lodash';
-import 'dotenv/config';
+const uniqBy = require("lodash.uniqby");
+
+require("dotenv").config();
 
 (async () => {
   const j1Client = await getClient({
