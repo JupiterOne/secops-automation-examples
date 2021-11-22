@@ -50,8 +50,8 @@ Several of these fields have conventional meaning that will be leveraged by J1 q
 | category    | Type of risk, e.g. physical, logical, human, etc.  |
 | threats   | comma-delimited list of threats posed by the risk        |
 | targets   | asset targets affected by threat: devices, networks, applications, data, users |
-| probability | integer model of likelihood: 0-5 |
-| impact | integer model of business impact if exploited: 0-5 |
+| probability | integer model of likelihood: 1, 2, 3, 5, 8, 13... |
+| impact | integer model of business impact if exploited: 1, 2, 3, 5, 8, 13... |
 | score  | integer product of probability x impact |
 | status | current state of risk, one of: open, mitigated, transferred, accepted |
 | assessment | name of associated risk assessment activity, if any |
