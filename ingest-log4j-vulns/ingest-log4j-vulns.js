@@ -94,6 +94,9 @@ const main = async () => {
     console.log('Entities Uploading :>> ', entities.length);
 
     await j1.bulkUpload({syncJobOptions: {scope}, entities})
+    if (entities.length) {
+      console.log('Entities may be found with a J1QL query like "Find log4j_vulnerability"')
+    }
 }
 
 main().catch(console.error)
