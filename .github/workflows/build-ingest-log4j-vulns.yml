@@ -15,7 +15,7 @@ jobs:
         with:
           filters: |
             projectchanged:
-              - './ingest-log4j-vulns'
+              - 'ingest-log4j-vulns/**'
 
       - name: Should Build?
         if: steps.filter.outputs.projectchanged == 'true'
