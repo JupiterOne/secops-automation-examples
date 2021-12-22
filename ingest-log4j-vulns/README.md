@@ -1,0 +1,1 @@
+# JupiterOne - Ingest Log4J Vulnerabilities

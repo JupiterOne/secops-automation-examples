@@ -3,5 +3,8 @@ node_modules
 .DS_Store
 dist
 
+j1-scope-key
+results
+
 results.json
 bulkDelete.json
