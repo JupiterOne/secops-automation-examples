@@ -1,0 +1,15 @@
+{
+  "name": "ingest-log4j-vulns",
+  "author": "JupiterOne",
+  "version": "0.0.1",
+  "description": "A tool to ingest log4shell_sentinel output into the JupiterOne graph for vulnerability remediation",
+  "main": "ingest-log4j-vulns.js",
+  "scripts": {
+    "start": "node ingest-log4j-vulns.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@jupiterone/jupiterone-client-nodejs": "^0.25.0",
+    "uuid": "^8.3.2"
+  }
+}

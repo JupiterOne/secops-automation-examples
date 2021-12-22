@@ -1,0 +1,42 @@
+name: Build
+on: ['push']
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v2
+
+      - name: Detect Dockerfile changes
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            projectchanged:
+              - 'ingest-log4j-vulns/**'
+
+      - name: Should Build?
+        if: steps.filter.outputs.projectchanged == 'true'
+        run: |
+          echo "Project changed. Need to update Docker image."
+          echo "need_docker_build=true" >> $GITHUB_ENV
+          
+      - name: Login to DockerHub Registry
+        if: env.need_docker_build
+        run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin docker.io
+
+      - name: Build the latest Docker image
+        if: env.need_docker_build
+        run: |
+          cd ingest-log4j-vulns
+          pkgver="$(jq -r .version package.json)"
+          echo "pkgver=$pkgver" >> $GITHUB_ENV
+          docker build --file Dockerfile --tag jupiterone/ingest-log4j-vulns:latest --tag jupiterone/ingest-log4j-vulns:$pkgver . 
+
+      - name: Push the latest Docker image
+        if: env.need_docker_build
+        run: |
+          docker push jupiterone/ingest-log4j-vulns:latest
+          docker push jupiterone/ingest-log4j-vulns:${{ env.pkgver }}
