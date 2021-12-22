@@ -75,7 +75,7 @@ const main = async () => {
             _key: uuid(),
             _type: 'log4j_vulnerability',
             _class: 'Finding',
-            displayName: sentinelDictionary[11],
+            displayName: sentinelDataProps[11],
             [sentinelDictionary[0]]: sentinelDataProps[0],
             [sentinelDictionary[1]]: sentinelDataProps[1],
             [sentinelDictionary[6]]: sentinelDataProps[6],
