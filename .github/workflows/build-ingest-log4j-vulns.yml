@@ -1,8 +1,5 @@
 name: Build
-on:
-  push:
-    branches:
-      - main
+on: ['push']
 
 jobs:
   docker:
@@ -33,9 +30,10 @@ jobs:
       - name: Build the latest Docker image
         if: env.need_docker_build
         run: |
-          pkgver="$(jq -r .version ./ingest-log4j-vulns/package.json)"
+          cd ingest-log4j-vulns
+          pkgver="$(jq -r .version package.json)"
           echo "pkgver=$pkgver" >> $GITHUB_ENV
-          docker build --file ./ingest-log4j-vulns/Dockerfile --tag jupiterone/ingest-log4j-vulns:latest --tag jupiterone/ingest-log4j-vulns:$pkgver . 
+          docker build --file Dockerfile --tag jupiterone/ingest-log4j-vulns:latest --tag jupiterone/ingest-log4j-vulns:$pkgver . 
 
       - name: Push the latest Docker image
         if: env.need_docker_build
