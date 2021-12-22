@@ -27,6 +27,34 @@ You will need to export the following ENV vars for ingestion:
 
 `./scan-for-log4j.sh ./some/target/path`  - scan only target path, additionally do not use superuser privs
 
+### Usage with Docker
+
+`docker run -v /target/file/path:/scan -e J1_ACCOUNT="$J1_ACCOUNT" -e J1_ACCESS_TOKEN="$J1_ACCESS_TOKEN" --rm jupiterone/ingest-log4j-vulns`
+
+Use `-v /:/scan` to scan entire filesystem.
+
+Note: This does not run as root and does not scan container images. 
+
+## Expected Workflow:
+
+This tool is best utilized as a Log4j vulnerability identification and remediation tool. This is intended to be used across your entire fleet of hosts to triage and remediate Log4j vulnerabilities. If you were to begin running this tool and encounter a Log4j vulnerability you should continuously use this tool after your remediation efforts to track your progress on the JupiterOne platform. This enables you and stakeholders alike to visually see the progress you're making in eliminating Log4j vulnerabilities in your stack. 
+
+Step 1:
+
+Deploy this software to your hosts.
+
+Step 2:
+
+Automate the monitoring of your hosts by creating a CRON job that runs every hour.
+
+`0 * * * * /path/to/scan-for-log4j.sh`
+
+or
+
+`0 * * * * docker run -v /target/file/path:/scan -e J1_ACCOUNT="$J1_ACCOUNT" -e J1_ACCESS_TOKEN="$J1_ACCESS_TOKEN" --rm jupiterone/ingest-log4j-vulns`
+
+Step 3:
+
 
 
 [1]: https://github.com/ossie-git/log4shell_sentinel
