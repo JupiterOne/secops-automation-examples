@@ -13,7 +13,7 @@ For non-Docker execution, you will need to:
 1. Clone this repo, containing the shell and Node scripts in this example
 2. Run `npm install` to install dependencies
 3. Install an [OS/arch-appropriate binary of log4shell_sentinel][2] on each target
-host.
+host. We also provide [pre-built binaries for common OSes here][4].
 
 The ingestion script assumes `log4shell_sentinel` is available locally, and is
 in your system's `$PATH`.
@@ -76,3 +76,4 @@ As you work to remediate hosts, the above query results will automatically retur
 [1]: https://github.com/ossie-git/log4shell_sentinel
 [2]: https://github.com/ossie-git/log4shell_sentinel/releases/tag/v1.0.0
 [3]: https://github.com/JupiterOne/secops-automation-examples/tree/main/ingest-log4j-vulns#usage-with-docker
+[4]: https://github.com/JupiterOne/secops-automation-examples/releases/tag/ingest-log4j-vulns-v0.0.1
