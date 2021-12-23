@@ -1,0 +1,78 @@
+{
+	"widgets": [
+		{
+			"id": "cf62f5ac-0127-41cb-8672-c8ae539856c4",
+			"title": "Sorted List of Vulnerable Hosts",
+			"type": "table",
+			"config": {
+				"queries": [
+					{
+						"name": "query1",
+						"query": "Find log4j_vulnerability as v return v.hostname, count(v) as vulns ORDER BY vulns DESC"
+					}
+				]
+			}
+		},
+		{
+			"id": "74571ecc-c811-471d-bffc-3ad6c7dda6cd",
+			"title": "Total vulns",
+			"type": "number",
+			"config": {
+				"queries": [
+					{
+						"name": "query1",
+						"query": "Find log4j_vulnerability as v return count(v) as value"
+					}
+				]
+			}
+		},
+		{
+			"id": "b2d96eb7-c442-4985-8fb0-ed57f11f31d4",
+			"title": "Oldest vulnerable hosts",
+			"type": "table",
+			"config": {
+				"queries": [
+					{
+						"name": "query1",
+						"query": "Find log4j_vulnerability as v ORDER BY v._createdOn ASC"
+					}
+				]
+			}
+		}
+	],
+	"layouts": {
+		"xs": [],
+		"sm": [],
+		"md": [],
+		"lg": [
+			{
+				"w": 12,
+				"h": 2,
+				"x": 0,
+				"y": 0,
+				"i": "cf62f5ac-0127-41cb-8672-c8ae539856c4",
+				"moved": false,
+				"static": false
+			},
+			{
+				"w": 3,
+				"h": 2,
+				"x": 0,
+				"y": 2,
+				"i": "74571ecc-c811-471d-bffc-3ad6c7dda6cd",
+				"moved": false,
+				"static": false
+			},
+			{
+				"w": 9,
+				"h": 2,
+				"x": 3,
+				"y": 2,
+				"i": "b2d96eb7-c442-4985-8fb0-ed57f11f31d4",
+				"moved": false,
+				"static": false
+			}
+		],
+		"xl": []
+	}
+}
