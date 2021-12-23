@@ -7,11 +7,13 @@ environment that you would like to scan and remediate for log4j vulnerabilities.
 
 ## Dependencies / Installation
 
-You will need to:
+This tool is distributed as a Docker image for your convenience (see [Usage With Docker][3] below).
+
+For non-Docker execution, you will need to:
 1. Clone this repo, containing the shell and Node scripts in this example
 2. Run `npm install` to install dependencies
 3. Install an [OS/arch-appropriate binary of log4shell_sentinel][2] on each target
-host.
+host. We also provide [pre-built binaries for common OSes here][4].
 
 The ingestion script assumes `log4shell_sentinel` is available locally, and is
 in your system's `$PATH`.
@@ -23,7 +25,7 @@ You will need to export the following ENV vars for ingestion:
 
 ## Usage
 
-`sudo ./scan-for-log4j.sh`  - by default, scan the entire filesystem, including container images (recommended)
+`sudo ./scan-for-log4j.sh`  - by default, scan the entire filesystem, including container images (recommended by `log4shell_sentinel`)
 
 `./scan-for-log4j.sh ./some/target/path`  - scan only target path, additionally do not use superuser privs
 
@@ -35,6 +37,7 @@ Use `-v /:/scan` to scan the entire filesystem (recommended).
 
 NOTES: 
 * This does not run as root and does not scan container images. 
+* The tool expects to have write access to the top-level directory of your volume-mounted scan path. We persist a small file containing a unique token needed for idempotency and to support accurate removal of any Findings ingested for each host, once they are remediated.
 * The `HOST_IDENTIFIER` env var is needed since this information is not available inside the running Docker container.
 * If desired, you may also specify `-e HOST_IP="some.ip.addr"` to provide the outer hosts' IP address.
 
@@ -45,7 +48,7 @@ vulnerabilities across your entire fleet of hosts.
 
 Step 1: Deployment
 
-Deploy this software to your hosts via MDM, Ansible, Chef, etc.
+Deploy this software to your hosts via MDM, Ansible, Chef, etc. Or use Docker, if that is available.
 
 Step 2: Scanning
 
@@ -72,3 +75,5 @@ As you work to remediate hosts, the above query results will automatically retur
 
 [1]: https://github.com/ossie-git/log4shell_sentinel
 [2]: https://github.com/ossie-git/log4shell_sentinel/releases/tag/v1.0.0
+[3]: https://github.com/JupiterOne/secops-automation-examples/tree/main/ingest-log4j-vulns#usage-with-docker
+[4]: https://github.com/JupiterOne/secops-automation-examples/releases/tag/ingest-log4j-vulns-v0.0.1
