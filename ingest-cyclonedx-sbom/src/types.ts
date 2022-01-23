@@ -4,6 +4,7 @@ export interface J1Dependency {
   name: string;
   version: string;
   license: string;
+  purl?: string;
   direct?: boolean;
   scope?: string;
 }
