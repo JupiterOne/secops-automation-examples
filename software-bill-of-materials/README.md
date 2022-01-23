@@ -20,16 +20,18 @@ J1_API_TOKEN=<your token here>
 J1_ACCOUNT=<your J1 account id here>
 ```
 
-Invoke the script with a fully-qualified path to the code repository directory you want to scan:
+Invoke the script and it will query J1 for all CodeModules, generating a local 'sbom.json' file.
 
 ```
 node ./dist/index.js
 ```
 
-Alternately, you may override the J1QL query that is used to find the `npm_packages` by passing it as a quoted argument, like so:
+Alternately, you may override the J1QL query that is used to find the `CodeModules` by passing it as a quoted argument, like so:
 
 ```
 node ./dist/index.js "Find npm_package with version!=undefined and ..."
 ```
+
+^^ This example invocation uses J1QL that limits modules to the type `npm_package`...
 
 The script will produce a `sbom.json` file with zero or more components, based on the found packages in J1.
