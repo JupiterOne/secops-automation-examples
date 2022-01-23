@@ -18,6 +18,7 @@ export interface Dependency {
   version: string;
   license: string;
   direct: boolean;
+  purl: string;
 }
 
 function seekLicenseFile(moduleDir): string {
@@ -72,6 +73,7 @@ async function inventoryPackages(dir: string, directDependencies: string[]): Pro
       name,
       version,
       license,
+      purl: 'pkg:npm/' + name + '@' + version,
       direct: directStr === 'direct'
     });
   });
