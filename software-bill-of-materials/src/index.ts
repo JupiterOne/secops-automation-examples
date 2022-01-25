@@ -46,7 +46,7 @@ async function run (): Promise<void> {
     dev: false
   }).init();
 
-  const j1ql = process.argv[2] || 'Find CodeModule with license!=undefined and version!=undefined THAT USES as u CodeRepo';
+  const j1ql = process.argv[2] || 'Find CodeModule with license!=undefined and version!=undefined THAT USES CodeRepo';
   console.log(`searching J1 with: "${j1ql}"...`);
   const modules: CodeModuleEntity[] = await j1Client.queryV1(j1ql);
   console.log(`found ${modules.length} CodeModules in J1...`);
