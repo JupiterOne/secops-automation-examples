@@ -1,9 +1,12 @@
 import * as fs from "fs";
-// import { retry } from "@lifeomic/attempt";
+import { retry } from "@lifeomic/attempt";
 import { JupiterOneClient } from '@jupiterone/jupiterone-client-nodejs';
 import { J1Dependency, SBOM, SBOMComponent } from "./types";
 
-/* eslint-disable @typescript-eslint/no-use-before-define */
+/* eslint-disable 
+  @typescript-eslint/no-use-before-define,
+  @typescript-eslint/no-explicit-any, 
+*/
 async function run (pathToSBOM: string, repoName: string): Promise<void> {
   const SBOMComponents = await getSBOMComponents(pathToSBOM);
 
@@ -20,30 +23,30 @@ async function run (pathToSBOM: string, repoName: string): Promise<void> {
 
   console.log('Gathering CodeModule data from JupiterOne...');
   const codeModuleIdMap = await getCodeModuleIdMap(j1Client);
-  console.log(`${Object.keys(codeModuleIdMap).length} NPM packages found in J1`);
+  console.log(`${Object.keys(codeModuleIdMap).length} CodeModules found in J1`);
 
   for (const component of SBOMComponents) {
-    // let res: any;
-    const packageId = codeModuleIdMap[component.purl];
+    let res: any;
+    const purl = getPurl(component);
+    let packageId = codeModuleIdMap[purl];
 
     if (!packageId) {
 
       const dependencyProps: J1Dependency = {
         displayName: component.name,
-        fullName: component.purl,
+        fullName: purl,
         name: component.name,
-        purl: component.purl,
-        license: component.licenses[0].license.id,
+        purl,
+        license: getLicense(component),
         scope: component.group,
-        version: component.version
+        version: component.version,
+        from: `ingest-cyclonedx-sbom-${repoName}`
       };
 
       // e.g. pkg:npm/commander@8.3.0 ingests as type 'npm_package'
-      const j1Type = component.purl.split('/')[0].split(':')[1] + '_package';
-      console.log({dependencyProps, j1Type, codeRepoEntityId, packageId});
+      const j1Type = getType(component);
 
-      /*
-      console.log(`Creating CodeModule entity for ${component.name} ${j1Type} in J1...`);
+      process.stdout.write(`Creating CodeModule entity for ${purl} ${j1Type} in J1..`);
       res = await retry(() => {
         return j1Client.createEntity(
           `${j1Type}:${component.name}`, //_key
@@ -52,13 +55,12 @@ async function run (pathToSBOM: string, repoName: string): Promise<void> {
           dependencyProps
         );
       }, attemptOptions);
+      console.log(' ok');
       packageId = res.vertex.entity._id;
-    */
     }
 
-    console.log(`Creating ${repoName}:USES:${component.name} relationship in J1...`);
+    process.stdout.write(`Creating ${repoName}:USES:${component.name} relationship in J1..`);
 
-    /*
     res = await retry(() => {
       return j1Client.createRelationship(
         `${codeRepoEntityId}:USES:${packageId}`, //_key
@@ -72,10 +74,37 @@ async function run (pathToSBOM: string, repoName: string): Promise<void> {
         }
       );
     }, attemptOptions);
-    */
+    console.log(' ok');
   }
 
   console.log(`${SBOMComponents.length} dependencies ingested.`)
+}
+
+function getLicense(component: SBOMComponent): string {
+  let license;
+  try {
+    license = component.licenses[0].license.id;
+  } catch {
+    license = 'Unknown';
+  }
+  return license;
+}
+
+function getType(component: SBOMComponent): string {
+  let j1Type;
+  try {
+    // e.g. pkg:npm/foo@0.0.1 -> npm_package
+    j1Type = component.purl.split('/')[0].split(':')[1] + '_package';
+  } catch {
+    j1Type = 'unknown_package';
+
+  }
+  return j1Type;
+}
+
+function getPurl(component: SBOMComponent): string {
+  // url-decode '@' chars
+  return component.purl.replace(/%40/g, '@');
 }
 
 async function initJ1Client(): Promise<JupiterOneClient> {
@@ -158,16 +187,14 @@ if (!process.env.J1_ACCOUNT) {
   die('Missing J1_ACCOUNT ENV Var!');
 }
 
-/*
 const attemptOptions = {
   delay: 20000,
   factor: 1.5,
   maxAttempts: 0,
   maxDelay: 70,
-  beforeAttempt (context): void {
-    console.log(`attempt number ${context.attemptNum}...`);
+  beforeAttempt (): void {
+    process.stdout.write('.');
   }
 };
-*/
 
 run(sbomPath, j1RepoName).catch(console.error);

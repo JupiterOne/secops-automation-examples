@@ -7,6 +7,7 @@ export interface J1Dependency {
   purl?: string;
   direct?: boolean;
   scope?: string;
+  from?: string;
 }
 
 export interface SBOM {
