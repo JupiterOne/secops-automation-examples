@@ -2,11 +2,19 @@ import * as fs from "fs";
 import { retry } from "@lifeomic/attempt";
 import { JupiterOneClient } from '@jupiterone/jupiterone-client-nodejs';
 import { J1Dependency, SBOM, SBOMComponent } from "./types";
+import minimist from "minimist";
 
 /* eslint-disable 
   @typescript-eslint/no-use-before-define,
   @typescript-eslint/no-explicit-any, 
 */
+
+function usage(): void {
+  console.log(`${process.argv[0]} --sbom <path> --repo <string>`);
+  console.log('  --sbom  path to sbom file to ingest');
+  console.log('  --repo  name of coderepo ingest ');
+}
+
 async function run (pathToSBOM: string, repoName: string): Promise<void> {
   const SBOMComponents = await getSBOMComponents(pathToSBOM);
 
@@ -169,13 +177,17 @@ function getSBOMComponents(pathToSBOM): SBOMComponent[] {
   return Array.isArray(components) ? components : [];
 }
 
-const sbomPath = process.argv[2];
+const argv = minimist(process.argv.slice(2));
+
+const sbomPath = argv.sbom;
 if (!sbomPath || !fs.existsSync(sbomPath)) {
+  usage();
   die('You must provide a valid path to a CycloneDX bom.json file!', 2);
 }
 
-const j1RepoName = process.argv[3];
+const j1RepoName = argv.repo;
 if (!j1RepoName) {
+  usage();
   die('You must provide a repo name parameter specifying the CodeRepo to ingest the SBOM for!', 2);
 }
 
