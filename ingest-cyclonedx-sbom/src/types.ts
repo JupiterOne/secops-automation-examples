@@ -10,6 +10,13 @@ export interface J1Dependency {
   from?: string;
 }
 
+export interface J1UsesRelationship {
+  displayName: string;
+  version: string;
+  devDependency?: boolean;
+  directDependency?: boolean;
+}
+
 export interface SBOM {
     bomFormat: string;
     specVersion: string;

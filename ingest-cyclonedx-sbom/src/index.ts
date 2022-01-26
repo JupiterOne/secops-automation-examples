@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import { retry } from "@lifeomic/attempt";
 import { JupiterOneClient } from '@jupiterone/jupiterone-client-nodejs';
-import { J1Dependency, SBOM, SBOMComponent } from "./types";
+import { J1Dependency, J1UsesRelationship, SBOM, SBOMComponent } from "./types";
 import minimist from "minimist";
 
 /* eslint-disable 
@@ -10,12 +10,19 @@ import minimist from "minimist";
 */
 
 function usage(): void {
-  console.log(`${process.argv[0]} --sbom <path> --repo <string>`);
+  console.log(`${process.argv[0]} --sbom <path> --repo <string> [--devDeps <path>] [--directDeps <path>]`);
   console.log('  --sbom  path to sbom file to ingest');
   console.log('  --repo  name of coderepo ingest ');
+  console.log('  (optional) --devDeps path to json file array of dev dependencies');
+  console.log('  (optional) --directDeps path to json file array of direct dependencies');
 }
 
-async function run (pathToSBOM: string, repoName: string): Promise<void> {
+async function run (
+  pathToSBOM: string, 
+  repoName: string,
+  devDependencies: string[],
+  directDependencies: string[]
+): Promise<void> {
   const SBOMComponents = await getSBOMComponents(pathToSBOM);
 
   const j1Client = await initJ1Client();
@@ -69,6 +76,22 @@ async function run (pathToSBOM: string, repoName: string): Promise<void> {
 
     process.stdout.write(`Creating ${repoName}:USES:${component.name} relationship in J1..`);
 
+    const relationshipProps: J1UsesRelationship = {
+      displayName: `${repoName}:USES:${component.name}`,
+      version: component.version,
+    };
+
+    // normalize component name for lookup in optional hint arrays
+    const normalizedComponentName = component.group ? component.group + '/' + component.name : component.name;
+
+    if (devDependencies.length) {
+      relationshipProps.devDependency = devDependencies.includes(normalizedComponentName);
+    }
+
+    if (directDependencies.length) {
+      relationshipProps.directDependency = directDependencies.includes(normalizedComponentName);
+    }
+
     res = await retry(() => {
       return j1Client.createRelationship(
         `${codeRepoEntityId}:USES:${packageId}`, //_key
@@ -76,10 +99,7 @@ async function run (pathToSBOM: string, repoName: string): Promise<void> {
         'USES', //_class
         codeRepoEntityId, //fromId
         packageId, //toId
-        {
-          displayName: `${repoName}:USES:${component.name}`,
-          version: component.version,
-        }
+        relationshipProps
       );
     }, attemptOptions);
     console.log(' ok');
@@ -177,19 +197,20 @@ function getSBOMComponents(pathToSBOM): SBOMComponent[] {
   return Array.isArray(components) ? components : [];
 }
 
-const argv = minimist(process.argv.slice(2));
+const { sbom, repo, devDeps, directDeps } = minimist(process.argv.slice(2));
 
-const sbomPath = argv.sbom;
-if (!sbomPath || !fs.existsSync(sbomPath)) {
+if (!sbom || !fs.existsSync(sbom)) {
   usage();
   die('You must provide a valid path to a CycloneDX bom.json file!', 2);
 }
 
-const j1RepoName = argv.repo;
-if (!j1RepoName) {
+if (!repo) {
   usage();
   die('You must provide a repo name parameter specifying the CodeRepo to ingest the SBOM for!', 2);
 }
+
+const devDependencies = devDeps ? JSON.parse(fs.readFileSync(devDeps, {encoding: 'utf8'})) : [];
+const directDependencies = directDeps ? JSON.parse(fs.readFileSync(directDeps, {encoding: 'utf8'})) : [];
 
 if (!process.env.J1_API_TOKEN) {
   die('Missing J1_API_TOKEN ENV Var!');
@@ -209,4 +230,4 @@ const attemptOptions = {
   }
 };
 
-run(sbomPath, j1RepoName).catch(console.error);
+run(sbom, repo, devDependencies, directDependencies).catch(console.error);
