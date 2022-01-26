@@ -1,4 +1,5 @@
 import * as fs from "fs-extra";
+import path from "path";
 
 const JupiterOneClient = require("@jupiterone/jupiterone-client-nodejs");
 
@@ -77,7 +78,7 @@ async function run (): Promise<void> {
     });
   }
 
-  const bom = JSON.parse(await fs.readFile('./bom.json', 'utf8'));
+  const bom = JSON.parse(await fs.readFile(path.join(__dirname, '../bom-skeleton.json'), 'utf8'));
   bom.components = components;
 
   await fs.writeFile('sbom.json', JSON.stringify(bom, null, 2));
