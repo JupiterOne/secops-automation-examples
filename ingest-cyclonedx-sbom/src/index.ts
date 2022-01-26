@@ -10,11 +10,12 @@ import minimist from "minimist";
 */
 
 function usage(): void {
-  console.log(`${process.argv[0]} --sbom <path> --repo <string> [--devDeps <path>] [--directDeps <path>]`);
+  console.log('ingest-cyclonedx-sbom --sbom <path> --repo <string> [--devDeps <path>] [--directDeps <path>] [--directOnly]');
   console.log('  --sbom  path to sbom file to ingest');
   console.log('  --repo  name of coderepo ingest ');
-  console.log('  (optional) --devDeps path to json file array of dev dependencies');
-  console.log('  (optional) --directDeps path to json file array of direct dependencies');
+  console.log('  (optional) --devDeps  path to json file array of dev dependencies');
+  console.log('  (optional) --directDeps  path to json file array of direct dependencies');
+  console.log('  (optional) --directOnly  only ingest direct dependencies (requires --directDeps)');
 }
 
 async function run (
@@ -40,10 +41,19 @@ async function run (
   const codeModuleIdMap = await getCodeModuleIdMap(j1Client);
   console.log(`${Object.keys(codeModuleIdMap).length} CodeModules found in J1`);
 
+  let ingestedEntitiesCount = 0;
   for (const component of SBOMComponents) {
     let res: any;
     const purl = getPurl(component);
     let packageId = codeModuleIdMap[purl];
+
+    // normalize component name for lookup in optional hint arrays
+    const normalizedComponentName = component.group ? component.group + '/' + component.name : component.name;
+
+    if (directOnly && !directDependencies.includes(normalizedComponentName)) {
+      console.log(`Skipping transitive dep: ${normalizedComponentName}`);
+      continue; // skip transitive deps if --directOnly is specified
+    }
 
     if (!packageId) {
 
@@ -72,6 +82,7 @@ async function run (
       }, attemptOptions);
       console.log(' ok');
       packageId = res.vertex.entity._id;
+      ingestedEntitiesCount++;
     }
 
     process.stdout.write(`Creating ${repoName}:USES:${component.name} relationship in J1..`);
@@ -80,9 +91,6 @@ async function run (
       displayName: `${repoName}:USES:${component.name}`,
       version: component.version,
     };
-
-    // normalize component name for lookup in optional hint arrays
-    const normalizedComponentName = component.group ? component.group + '/' + component.name : component.name;
 
     if (devDependencies.length) {
       relationshipProps.devDependency = devDependencies.includes(normalizedComponentName);
@@ -105,7 +113,7 @@ async function run (
     console.log(' ok');
   }
 
-  console.log(`${SBOMComponents.length} dependencies ingested.`)
+  console.log(`${ingestedEntitiesCount} total dependencies ingested.`)
 }
 
 function getLicense(component: SBOMComponent): string {
@@ -196,8 +204,15 @@ function getSBOMComponents(pathToSBOM): SBOMComponent[] {
   const { components } = sbomData;
   return Array.isArray(components) ? components : [];
 }
+const { sbom, repo, devDeps, directDeps, directOnly } = minimist(process.argv.slice(2));
 
-const { sbom, repo, devDeps, directDeps } = minimist(process.argv.slice(2));
+if (directOnly && !directDeps) {
+  usage();
+  die('You must provide one or more direct dependencies via JSON if you specify --directOnly!');
+}
+
+const devDependencies = devDeps ? JSON.parse(fs.readFileSync(devDeps, {encoding: 'utf8'})) : [];
+const directDependencies = directDeps ? JSON.parse(fs.readFileSync(directDeps, {encoding: 'utf8'})) : [];
 
 if (!sbom || !fs.existsSync(sbom)) {
   usage();
@@ -208,9 +223,6 @@ if (!repo) {
   usage();
   die('You must provide a repo name parameter specifying the CodeRepo to ingest the SBOM for!', 2);
 }
-
-const devDependencies = devDeps ? JSON.parse(fs.readFileSync(devDeps, {encoding: 'utf8'})) : [];
-const directDependencies = directDeps ? JSON.parse(fs.readFileSync(directDeps, {encoding: 'utf8'})) : [];
 
 if (!process.env.J1_API_TOKEN) {
   die('Missing J1_API_TOKEN ENV Var!');

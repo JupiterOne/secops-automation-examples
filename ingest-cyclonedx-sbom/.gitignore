@@ -4,4 +4,4 @@ local
 dist
 
 .eslintcache
-bom.json
+*.json
