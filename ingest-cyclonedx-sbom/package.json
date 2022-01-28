@@ -1,0 +1,55 @@
+{
+  "name": "ingest-cyclonedx-sbom",
+  "version": "0.0.1",
+  "description": "Ingest CycloneDX SBOM files (JSON format) into JupiterOne",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "author": "JupiterOne Security <security@jupiterone.com>",
+  "license": "MIT",
+  "files": [
+    "LICENSE",
+    "dist",
+    "bin"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "bin": {
+    "inventory": "bin/inventory"
+  },
+  "scripts": {
+    "env": "export $(grep -v '^#' .env | xargs);",
+    "format": "yarn prettier --write '**/*.{ts,js,json,css,md,yml}'",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint . --cache --fix --ext .ts,.tsx",
+    "pretest": "yarn lint && yarn type-check",
+    "test": "echo OK",
+    "copydist": "cp -R LICENSE *.md yarn.lock package.json ./dist/",
+    "distpackage": "(cd ./dist && sed -ibak -e 's#dist/inde[x]#index#g' package.json && rm package.jsonbak)",
+    "prebuild": "yarn test",
+    "build": "tsc -p tsconfig.dist.json --declaration",
+    "prepack": "yarn build"
+  },
+  "dependencies": {
+    "@cyclonedx/bom": "^3.3.1",
+    "@jupiterone/jupiterone-client-nodejs": "^0.25.0",
+    "@lifeomic/attempt": "^3.0.0",
+    "dotenv": "^8.2.0",
+    "fs-extra": "^9.0.1",
+    "glob": "^7.1.6",
+    "minimist": "^1.2.5"
+  },
+  "devDependencies": {
+    "@types/node": "^13.9.8",
+    "@typescript-eslint/eslint-plugin": "^2.26.0",
+    "@typescript-eslint/parser": "^2.26.0",
+    "eslint": "^7.14.0",
+    "eslint-plugin-jest": "^23.8.2",
+    "eslint-plugin-prettier": "^3.1.4",
+    "husky": "^2.4.0",
+    "lint-staged": "^8.2.0",
+    "prettier": "^2.0.2",
+    "ts-node": "^9.0.0",
+    "typescript": "^4.1.2"
+  }
+}

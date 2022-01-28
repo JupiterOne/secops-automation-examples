@@ -1,4 +1,5 @@
 import * as fs from "fs-extra";
+import path from "path";
 
 const JupiterOneClient = require("@jupiterone/jupiterone-client-nodejs");
 
@@ -35,6 +36,7 @@ export type CodeModuleEntity = {
     name: string;
     license: string;
     version: string;
+    purl?: string;
   }
 };
 
@@ -45,21 +47,23 @@ async function run (): Promise<void> {
     dev: false
   }).init();
 
-  const j1ql = process.argv[2] || 'Find npm_package with license!=undefined and version!=undefined THAT USES as u CodeRepo WHERE u.directDependency=true';
+  const j1ql = process.argv[2] || 'Find CodeModule with license!=undefined and version!=undefined THAT USES CodeRepo';
   console.log(`searching J1 with: "${j1ql}"...`);
   const modules: CodeModuleEntity[] = await j1Client.queryV1(j1ql);
-  console.log(`found ${modules.length} NPM packages in J1...`);
+  console.log(`found ${modules.length} CodeModules in J1...`);
 
   const components: Component[] = [];
 
   for (const module of modules) {
-    const { name, version, license } = module?.properties;
+    const { name, version, license, purl } = module?.properties;
 
-    const purl = 'pkg:npm/' + name + '@' + version;
+    // account for possibly missing purl data
+    const moduleType = module.entity._type[0].split('_')[0]; // e.g. ['npm_package'] -> 'npm'
+    const fallBackPurl = `pkg:${moduleType}/${name}@${version}`;
 
     components.push({
       type: 'library',
-      "bom-ref": purl,
+      'bom-ref': purl || fallBackPurl,
       name,
       version,
       description: '',
@@ -68,13 +72,13 @@ async function run (): Promise<void> {
           id: license
         }
       }],
-      purl,
+      purl: purl || fallBackPurl,
       externalReferences: [],
       scope: 'required'
     });
   }
 
-  const bom = JSON.parse(await fs.readFile('./bom.json', 'utf8'));
+  const bom = JSON.parse(await fs.readFile(path.join(__dirname, '../bom-skeleton.json'), 'utf8'));
   bom.components = components;
 
   await fs.writeFile('sbom.json', JSON.stringify(bom, null, 2));
