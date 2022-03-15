@@ -8,8 +8,15 @@ const { version } = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 const USERAGENT = `J1 CODEOWNERS Automation v${version}`;
 const PRBRANCH = USERAGENT.toLowerCase().replace(/ /g, '-');
 const ERRLOG = 'error.log';
+const DEFAULT_ORG = process.env.DEFAULT_ORG || 'jupiterone';
+const DEFAULT_OWNER = process.env.DEFAULT_OWNER || 'jupiterone';
 
 async function processRepo(repo, filteredTeamsLookup) {
+  if (repo.archived) {
+    log(`SKIPPING repo ${repo.name}, since it is archived.`, 'warn');
+    return;
+  }
+
   if(await doesCODEOWNERSExist(repo.name)) {
     log(`SKIPPING repo ${repo.name} due to existing CODEOWNERS file.`, 'warn');
     return;
@@ -25,7 +32,7 @@ async function processRepo(repo, filteredTeamsLookup) {
   await createPullRequest(branch, repo, debugCommitAuthors);
 }
 
-async function doesCODEOWNERSExist(repo, owner='jupiterone') {
+async function doesCODEOWNERSExist(repo, owner=DEFAULT_OWNER) {
   log(`Checking if repo ${repo} already has a CODEOWNERS file...`);
   // per https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners#codeowners-file-location
   if (await contentExists(repo, 'CODEOWNERS')) return true;
@@ -34,7 +41,7 @@ async function doesCODEOWNERSExist(repo, owner='jupiterone') {
   return false;
 }
 
-async function contentExists(repo, path, owner='jupiterone') {
+async function contentExists(repo, path, owner=DEFAULT_OWNER) {
   let content;
   try {
     content = await octokit.repos.getContent({owner, repo, path});
@@ -72,7 +79,7 @@ async function generateTeamOwnersForRepo(repo, teamsLookup) {
   return { ownerTeams, commitAuthors };
 }
 
-async function getTopFrecentAuthorLogins(repo, numAuthors=5, numCommits=100, owner='jupiterone') {
+async function getTopFrecentAuthorLogins(repo, numAuthors=5, numCommits=100, owner=DEFAULT_OWNER) {
   try {
     const commits = await getRecentCommits(repo, numCommits, owner);
     const len = commits.length;
@@ -96,7 +103,7 @@ async function getTopFrecentAuthorLogins(repo, numAuthors=5, numCommits=100, own
   }
 }
 
-async function getRecentCommits(repo, max=100, owner='jupiterone') {
+async function getRecentCommits(repo, max=100, owner=DEFAULT_OWNER) {
   log(`Retrieving last ${max} commits for repo ${repo}...`);
   return octokit.paginate(
     octokit.repos.listCommits,
@@ -104,7 +111,7 @@ async function getRecentCommits(repo, max=100, owner='jupiterone') {
     response => response.data);
 }
 
-async function addTeamToRepo(team_slug, repo, permission='push', org='jupiterone', owner='jupiterone') {
+async function addTeamToRepo(team_slug, repo, permission='push', org=DEFAULT_ORG, owner=DEFAULT_OWNER) {
   log(`Adding team ${team_slug} to repo ${repo}...`);
   await waitForSecondaryRateLimitWindow();
   const updatePromise = octokit.teams.addOrUpdateRepoPermissionsInOrg({
@@ -118,7 +125,7 @@ async function addTeamToRepo(team_slug, repo, permission='push', org='jupiterone
   return updatePromise;
 }
 
-async function createCODEOWNERSBranch(owners, repo, org='jupiterone', branch=PRBRANCH) {
+async function createCODEOWNERSBranch(owners, repo, org=DEFAULT_ORG, branch=PRBRANCH) {
 
   log(`Creating branch ${branch} for ${repo}...`);
   const dir = `./${repo}`;
@@ -154,7 +161,7 @@ async function createCODEOWNERSBranch(owners, repo, org='jupiterone', branch=PRB
   return branch;
 }
 
-async function cloneRepo(repo, dir=`./${repo}`, org='JupiterOne') {
+async function cloneRepo(repo, dir=`./${repo}`, org=DEFAULT_ORG) {
   await git.clone({
     fs,
     http,
@@ -175,7 +182,7 @@ async function checkoutBranch(dir, ref) {
   });
 }
 
-async function createPullRequest(head, repo, authors, owner='jupiterone') {
+async function createPullRequest(head, repo, authors, owner=DEFAULT_OWNER) {
   log(`Creating pull request for ${repo.name} from ${head} -> ${repo.default_branch}`);
   await waitForSecondaryRateLimitWindow();
   const prPromise = octokit.pulls.create({
@@ -222,7 +229,7 @@ function log(msg, level='log') {
   }
 }
 
-async function getOrgRepos(org='jupiterone') {
+async function getOrgRepos(org=DEFAULT_ORG) {
   log('Discovering repos... ');
   return octokit.paginate(
     octokit.repos.listForOrg,
@@ -235,7 +242,7 @@ async function getOrgRepos(org='jupiterone') {
 //   user2: [ 'teamslug2' ],
 //   user3: []
 // }
-async function generateTeamMembershipLookup(org='jupiterone') {
+async function generateTeamMembershipLookup(org=DEFAULT_ORG) {
   log('Discovering teams and memberships... ');
   const teams = (await octokit.teams.list({
     org
