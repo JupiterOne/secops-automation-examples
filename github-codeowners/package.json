@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@octokit/auth-token": "^2.5.0",
+    "@octokit/plugin-throttling": "^3.6.1",
     "@octokit/rest": "^18.12.0",
     "isomorphic-git": "^1.13.1"
   }

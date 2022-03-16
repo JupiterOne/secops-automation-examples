@@ -1,4 +1,5 @@
 import { Octokit } from "@octokit/rest"; 
+import { throttling } from "@octokit/plugin-throttling";
 import git from 'isomorphic-git'
 import http from 'isomorphic-git/http/node/index.cjs';
 import fs from "fs";
@@ -300,10 +301,31 @@ if (! process.env.GITHUB_AUTH_TOKEN) {
   process.exit(2);
 }
 
-const octokit = new Octokit({
+const MyOctokit = Octokit.plugin(throttling);
+
+const octokit = new MyOctokit({
   auth: process.env.GITHUB_AUTH_TOKEN,
   userAgent: USERAGENT,
   // log: console
+  throttle: {
+    onRateLimit: (retryAfter, options, octokit) => {
+      octokit.log.warn(
+        `Request quota exhausted for request ${options.method} ${options.url}`
+      );
+
+      if (options.request.retryCount === 0) {
+        // only retries once
+        octokit.log.info(`Retrying after ${retryAfter} seconds!`);
+        return true;
+      }
+    },
+    onSecondaryRateLimit: (retryAfter, options, octokit) => {
+      // does not retry, only logs a warning
+      octokit.log.warn(
+        `SecondaryRateLimit detected for request ${options.method} ${options.url}`
+      );
+    },
+  },
 });
 
 // Monkey-see, Monkey-patch...
