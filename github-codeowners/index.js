@@ -10,6 +10,8 @@ const PRBRANCH = USERAGENT.toLowerCase().replace(/ /g, '-');
 const ERRLOG = 'error.log';
 const DEFAULT_ORG = process.env.DEFAULT_ORG || 'jupiterone';
 const DEFAULT_OWNER = process.env.DEFAULT_OWNER || 'jupiterone';
+const DEBUG = process.env.DEBUG || false; // debug mode
+const SILENT = process.env.SILENT || false; // no logs
 
 async function processRepo(repo, filteredTeamsLookup) {
   if (repo.archived) {
@@ -23,13 +25,13 @@ async function processRepo(repo, filteredTeamsLookup) {
   }
 
   // discover teams to add to CODEOWNERS
-  const { ownerTeams, debugCommitAuthors } = await generateTeamOwnersForRepo(repo.name, filteredTeamsLookup);
+  const { ownerTeams, commitAuthors } = await generateTeamOwnersForRepo(repo.name, filteredTeamsLookup);
 
   for (const team of ownerTeams) {
     await addTeamToRepo(team, repo.name); // ensure team has push-or-higher access (so CODEOWNERS validates)
   }
   const branch = await createCODEOWNERSBranch(ownerTeams, repo.name);
-  await createPullRequest(branch, repo, debugCommitAuthors);
+  await createPullRequest(branch, repo, commitAuthors);
 }
 
 async function doesCODEOWNERSExist(repo, owner=DEFAULT_OWNER) {
@@ -158,6 +160,8 @@ async function createCODEOWNERSBranch(owners, repo, org=DEFAULT_ORG, branch=PRBR
   });
 
   addRateLimitingEvent();
+
+  await cleanupLocalDir(repo);
   return branch;
 }
 
@@ -199,6 +203,20 @@ async function createPullRequest(head, repo, authors, owner=DEFAULT_OWNER) {
   return prPromise;
 }
 
+async function cleanupLocalDir(repo) {
+
+  if (repo.indexOf('.') !== -1) {
+    log(`Directory '${repo}' appears to contain '.' chars, cowardly refusing to attempt a recursive cleanup...`, 'warn');
+    return;
+  }
+  fs.rmdir(repo, { recursive: true }, (err) => {
+    if (err) {
+      throw err;
+    }
+    log(`Directory '${repo}' has been deleted!`);
+});
+}
+
 const isometricGitOnAuthGitHubFn = () => { return { username: process.env.GITHUB_AUTH_TOKEN, password: '' }; };
 
 const rateLimitingEventLog = [];
@@ -224,7 +242,10 @@ async function waitForSecondaryRateLimitWindow(events=2, seconds=1, sleepMillis=
 }
 
 function log(msg, level='log') {
-  if (! process.env.SILENT) {
+  if (level==='debug' && !DEBUG) {
+    return;
+  }
+  if (! SILENT) {
     console[level](msg);
   }
 }
