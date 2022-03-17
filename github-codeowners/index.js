@@ -1,16 +1,19 @@
-import { Octokit } from "@octokit/rest"; 
-import { throttling } from "@octokit/plugin-throttling";
+import { Octokit } from '@octokit/rest'; 
+import { throttling } from '@octokit/plugin-throttling';
 import git from 'isomorphic-git'
 import http from 'isomorphic-git/http/node/index.cjs';
-import fs from "fs";
-import path from "path";
+import fs from 'fs';
+import path from 'path';
+import 'dotenv/config';
 
 const { version } = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 const USERAGENT = `J1 CODEOWNERS Automation v${version}`;
 const PRBRANCH = USERAGENT.toLowerCase().replace(/ /g, '-');
-const ERRLOG = 'error.log';
-const DEFAULT_ORG = process.env.DEFAULT_ORG || 'jupiterone';
-const DEFAULT_OWNER = process.env.DEFAULT_OWNER || 'jupiterone';
+const ERRLOG = process.env.ERRLOG || 'error.log';
+const ORG = process.env.ORG || 'jupiterone';
+const OWNER = process.env.OWNER || 'jupiterone';
+const DEFAULT_TEAM = process.env.DEFAULT_TEAM || 'engineering';
+const RUNMODE = process.env.RUNMODE || 'open_pulls';
 const DEBUG = process.env.DEBUG || false; // debug mode
 const SILENT = process.env.SILENT || false; // no logs
 
@@ -35,7 +38,7 @@ async function processRepo(repo, filteredTeamsLookup) {
   await createPullRequest(branch, repo, commitAuthors);
 }
 
-async function doesCODEOWNERSExist(repo, owner=DEFAULT_OWNER) {
+async function doesCODEOWNERSExist(repo, owner=OWNER) {
   log(`Checking if repo ${repo} already has a CODEOWNERS file...`);
   // per https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners#codeowners-file-location
   if (await contentExists(repo, 'CODEOWNERS')) return true;
@@ -44,7 +47,7 @@ async function doesCODEOWNERSExist(repo, owner=DEFAULT_OWNER) {
   return false;
 }
 
-async function contentExists(repo, path, owner=DEFAULT_OWNER) {
+async function contentExists(repo, path, owner=OWNER) {
   let content;
   try {
     content = await octokit.repos.getContent({owner, repo, path});
@@ -73,8 +76,8 @@ async function generateTeamOwnersForRepo(repo, teamsLookup) {
     }
   }
   if (!owners.size) {
-    log('WARN: no unique teams found among active commit authors, defaulting to "engineering"... ', 'warn');
-    owners.add('engineering');
+    log(`WARN: no unique teams found among active commit authors, defaulting to "${DEFAULT_TEAM}"... `, 'warn');
+    owners.add(DEFAULT_TEAM);
   }
   const ownerTeams = Array.from(owners);
 
@@ -82,7 +85,7 @@ async function generateTeamOwnersForRepo(repo, teamsLookup) {
   return { ownerTeams, commitAuthors };
 }
 
-async function getTopFrecentAuthorLogins(repo, numAuthors=5, numCommits=100, owner=DEFAULT_OWNER) {
+async function getTopFrecentAuthorLogins(repo, numAuthors=5, numCommits=100, owner=OWNER) {
   try {
     const commits = await getRecentCommits(repo, numCommits, owner);
     const len = commits.length;
@@ -106,7 +109,7 @@ async function getTopFrecentAuthorLogins(repo, numAuthors=5, numCommits=100, own
   }
 }
 
-async function getRecentCommits(repo, max=100, owner=DEFAULT_OWNER) {
+async function getRecentCommits(repo, max=100, owner=OWNER) {
   log(`Retrieving last ${max} commits for repo ${repo}...`);
   return octokit.paginate(
     octokit.repos.listCommits,
@@ -114,7 +117,7 @@ async function getRecentCommits(repo, max=100, owner=DEFAULT_OWNER) {
     response => response.data);
 }
 
-async function addTeamToRepo(team_slug, repo, permission='push', org=DEFAULT_ORG, owner=DEFAULT_OWNER) {
+async function addTeamToRepo(team_slug, repo, permission='push', org=ORG, owner=OWNER) {
   log(`Adding team ${team_slug} to repo ${repo}...`);
   await waitForSecondaryRateLimitWindow();
   const updatePromise = octokit.teams.addOrUpdateRepoPermissionsInOrg({
@@ -128,7 +131,7 @@ async function addTeamToRepo(team_slug, repo, permission='push', org=DEFAULT_ORG
   return updatePromise;
 }
 
-async function createCODEOWNERSBranch(owners, repo, org=DEFAULT_ORG, branch=PRBRANCH) {
+async function createCODEOWNERSBranch(owners, repo, org=ORG, branch=PRBRANCH) {
 
   log(`Creating branch ${branch} for ${repo}...`);
   const dir = `./${repo}`;
@@ -166,7 +169,7 @@ async function createCODEOWNERSBranch(owners, repo, org=DEFAULT_ORG, branch=PRBR
   return branch;
 }
 
-async function cloneRepo(repo, dir=`./${repo}`, org=DEFAULT_ORG) {
+async function cloneRepo(repo, dir=`./${repo}`, org=ORG) {
   await git.clone({
     fs,
     http,
@@ -187,7 +190,7 @@ async function checkoutBranch(dir, ref) {
   });
 }
 
-async function createPullRequest(head, repo, authors, owner=DEFAULT_OWNER) {
+async function createPullRequest(head, repo, authors, owner=OWNER) {
   log(`Creating pull request for ${repo.name} from ${head} -> ${repo.default_branch}`);
   await waitForSecondaryRateLimitWindow();
   const prPromise = octokit.pulls.create({
@@ -251,7 +254,7 @@ function log(msg, level='log') {
   }
 }
 
-async function getOrgRepos(org=DEFAULT_ORG) {
+async function getOrgRepos(org=ORG) {
   log('Discovering repos... ');
   return octokit.paginate(
     octokit.repos.listForOrg,
@@ -264,7 +267,7 @@ async function getOrgRepos(org=DEFAULT_ORG) {
 //   user2: [ 'teamslug2' ],
 //   user3: []
 // }
-async function generateTeamMembershipLookup(org=DEFAULT_ORG) {
+async function generateTeamMembershipLookup(org=ORG) {
   log('Discovering teams and memberships... ');
   const teams = (await octokit.teams.list({
     org
@@ -287,7 +290,7 @@ function filterTeamMemberships(memberLookup) {
       if (team.indexOf('admin') !== -1) return false;
       if (team.indexOf('contract') !== -1) return false;
       if (team === 'everyone') return false;
-      if (team === 'engineering') return false;
+      if (team === DEFAULT_TEAM) return false;
       return true;
     });
     filtered[member] = filteredArray;
@@ -330,6 +333,7 @@ const octokit = new MyOctokit({
 
 // Monkey-see, Monkey-patch...
 // https://stackoverflow.com/a/18391400
+// allows thrown Errors to be JSON.stringified
 if (!('toJSON' in Error.prototype))
 Object.defineProperty(Error.prototype, 'toJSON', {
     value: function () {
@@ -350,7 +354,17 @@ async function main() {
   const errlog = fs.createWriteStream(ERRLOG, {flags: 'a'});
   for (const repo of repos) {
     try {
-      await processRepo(repo, filteredTeamsLookup);
+      switch (RUNMODE) {
+        case 'open_pulls':
+          await processRepo(repo, filteredTeamsLookup);
+          break;
+        case 'merge_pulls':
+          // TODO
+          break;
+        default:
+          log(`Unknown RUNMODE: '${RUNMODE}'`, 'error');
+          process.exit(2);
+      }
     } catch (err) {
       const errMsg = `Error processing ${repo.name}: ${JSON.stringify(err, null, 2)}`;
       log(errMsg, 'warn');
