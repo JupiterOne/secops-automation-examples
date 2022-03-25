@@ -19,7 +19,35 @@ const ADOPTEDREPOS = process.env.ADOPTEDREPOS;
 const DEBUG = process.env.DEBUG || false; // debug mode
 const SILENT = process.env.SILENT || false; // no logs
 
-async function processRepo(repo, filteredTeamsLookup, adoptedRepoTeamsLookup) {
+async function main() {
+  log(`RUNMODE is: ${RUNMODE}`);
+  const adoptedRepoTeamsLookup = await getOptionalAdoptedRepoLookup();
+  const filteredGHTeamsLookup = await generateTeamMembershipLookup();
+  const repos = await getOrgRepos();
+  const errlog = fs.createWriteStream(ERRLOG, {flags: 'a'});
+
+  for (const repo of repos) {
+    try {
+      switch (RUNMODE) {
+        case 'open_pulls':
+          await processRepoPROpen(repo, filteredGHTeamsLookup, adoptedRepoTeamsLookup);
+          break;
+        case 'merge_pulls':
+          await processRepoPRMerge(repo);
+          break;
+        default:
+          log(`Unknown RUNMODE: '${RUNMODE}'`, 'error');
+          process.exit(2);
+      }
+    } catch (err) {
+      const errMsg = `Error processing ${repo.name}: ${JSON.stringify(err, null, 2)}`;
+      log(errMsg, 'warn');
+      errlog.write(errMsg);
+    }
+  }
+}
+
+async function processRepoPROpen(repo, filteredTeamsLookup, adoptedRepoTeamsLookup) {
   if (repo.archived) {
     log(`SKIPPING repo ${repo.name}, since it is archived.`, 'warn');
     return;
@@ -43,6 +71,33 @@ async function processRepo(repo, filteredTeamsLookup, adoptedRepoTeamsLookup) {
   }
   const branch = await createCODEOWNERSBranch(ownerTeams, repo.name);
   await createPullRequest(branch, repo, commitMessage);
+}
+
+async function processRepoPRMerge(repo) {
+  log(`Checking pr status for repo: ${repo.name}...`);
+  const pr = await getOpenCodeownersPR(repo);
+  if (!pr) {
+    return; // no mergeable PRs found
+  }
+  log(`Found mergeable PR: ${pr.html_url}`);
+
+  log(`Retrieving branch protection rules for ${repo.name}:${repo.default_branch}...`);
+  const protection = await getDefaultBranchProtection(repo);
+
+  if (protection) {
+    log(`Removing branch protection rules for ${repo.name}:${repo.default_branch}...`);
+    await deleteBranchProtection(repo);
+  }
+
+  log(`Merging pr#${pr.number} for ${repo.name}...`);
+  await mergeRepoPR(repo, pr);
+
+  if (protection) {
+    log(`Restoring branch protection rules for ${repo.name}:${repo.default_branch}...`);
+    await restoreBranchProtection(repo, protection);
+  }
+
+ return;
 }
 
 async function doesCODEOWNERSExist(repo, owner=OWNER) {
@@ -399,34 +454,6 @@ async function getOptionalAdoptedRepoLookup() {
   return adoptedRepoLookup;
 }
 
-async function main() {
-  log(`RUNMODE is: ${RUNMODE}`);
-  const adoptedRepoTeamsLookup = await getOptionalAdoptedRepoLookup();
-  const filteredGHTeamsLookup = await generateTeamMembershipLookup();
-  const repos = await getOrgRepos();
-  const errlog = fs.createWriteStream(ERRLOG, {flags: 'a'});
-
-  for (const repo of repos) {
-    try {
-      switch (RUNMODE) {
-        case 'open_pulls':
-          await processRepo(repo, filteredGHTeamsLookup, adoptedRepoTeamsLookup);
-          break;
-        case 'merge_pulls':
-          await mergeRepoPR(repo.name);
-          break;
-        default:
-          log(`Unknown RUNMODE: '${RUNMODE}'`, 'error');
-          process.exit(2);
-      }
-    } catch (err) {
-      const errMsg = `Error processing ${repo.name}: ${JSON.stringify(err, null, 2)}`;
-      log(errMsg, 'warn');
-      errlog.write(errMsg);
-    }
-  }
-}
-
 function getBypassAllowancePayload(protection) {
   const bypassAllowancePayload = {
     users: (protection.required_pull_request_reviews?.bypass_pull_request_allowances?.users || []).map(u=>u.slug),
@@ -450,6 +477,16 @@ function getRestrictionsPayload(protection) {
   return { shouldRestrict, restrictionsPayload };
 }
 
+function getRequiredStatusChecksPayload(protection) {
+  if (!protection.required_status_checks?.checks) {
+    return null; // required field, set to disable
+  }
+  return {
+    strict: !!protection.required_status_checks?.strict,
+    checks: protection.required_status_checks.checks
+  };
+}
+
 async function getOpenCodeownersPR(repo) {
   const { data: prs } = await octokit.pulls.list({
     owner: OWNER,
@@ -461,30 +498,57 @@ async function getOpenCodeownersPR(repo) {
   return prs[0];
 }
 
-async function mergeRepoPR(repo) {
-  log(`Checking pr status for repo: ${repo.name}...`);
-  const pr = await getOpenCodeownersPR(repo);
-  if (!pr) {
-    return; // no mergeable PRs found
-  }
-  log(`Found mergeable PR: ${pr.html_url}`);
-
-  log(`Retrieving branch protection rules for ${repo.name}:${repo.default_branch}...`);
-  const protection = await getDefaultBranchProtection(repo);
-
-  if (protection) {
-    log(`Removing branch protection rules for ${repo.name}:${repo.default_branch}...`);
-    await waitForSecondaryRateLimitWindow();
-    await octokit.repos.deleteBranchProtection({
-      owner: OWNER,
-      repo: repo.name,
-      branch: repo.default_branch
-    });
-    addRateLimitingEvent();
-  }
-
-  log(`Merging pr#${pr.number} for ${repo.name}...`);
+async function deleteBranchProtection(repo) {
   await waitForSecondaryRateLimitWindow();
+  const deleteRes = await octokit.repos.deleteBranchProtection({
+    owner: OWNER,
+    repo: repo.name,
+    branch: repo.default_branch
+  });
+  addRateLimitingEvent();
+  if (DEBUG) log(JSON.stringify(deleteRes, null, 2), 'debug');
+  return deleteRes;
+}
+
+async function restoreBranchProtection(repo, protection, forceCodeownersReview=true) {
+  const { shouldBypass, bypassAllowancePayload } = getBypassAllowancePayload(protection);
+  const { shouldRestrict, restrictionsPayload } = getRestrictionsPayload(protection);
+  const codeOwnerReviews = forceCodeownersReview || !!protection.required_pull_request_reviews?.require_code_owner_reviews;
+
+  const updateBranchProtectionPayload = {
+    owner: OWNER,
+    repo: repo.name,
+    branch: repo.default_branch,
+    required_pull_request_reviews: {
+      dismiss_stale_reviews: protection.required_pull_request_reviews?.dismiss_stale_reviews,
+      required_approving_review_count: protection.required_pull_request_reviews?.required_approving_review_count || 1,
+      require_code_owner_reviews: codeOwnerReviews
+    },
+    enforce_admins: protection.enforce_admins?.enabled,
+    required_status_checks: getRequiredStatusChecksPayload(protection),
+    required_signatures: protection.required_signatures?.enabled,
+    required_linear_history: protection.required_linear_history?.enabled,
+    allow_force_pushes: protection.allow_force_pushes?.enabled,
+    allow_deletions: protection.allow_deletions?.enabled,
+    required_conversation_resolution: protection.required_conversation_resolution?.enabled,  
+  };
+
+  if (shouldBypass) {
+    updateBranchProtectionPayload.required_pull_request_reviews.bypass_pull_request_allowances = bypassAllowancePayload;
+  }
+  updateBranchProtectionPayload.restrictions = shouldRestrict ? restrictionsPayload : null; // required field
+
+  if (DEBUG) log(JSON.stringify(updateBranchProtectionPayload, null, 2), 'debug');
+
+  await waitForSecondaryRateLimitWindow();
+  const updateRes = await octokit.repos.updateBranchProtection(updateBranchProtectionPayload);
+  addRateLimitingEvent();
+  if (DEBUG) log(JSON.stringify(updateRes, null, 2), 'debug');
+  return updateRes;
+}
+
+async function mergeRepoPR(repo, pr) {
+  await waitForSecondaryRateLimitWindow(1, 90); // try to avoid triggering secondary rate-limiting
   const mergeRes = await octokit.pulls.merge({
     owner: OWNER,
     repo: repo.name,
@@ -493,46 +557,7 @@ async function mergeRepoPR(repo) {
   });
   addRateLimitingEvent();
   if (DEBUG) log(JSON.stringify(mergeRes, null, 2), 'debug');
-
-  if (protection) {
-    log(`Restoring branch protection rules for ${repo.name}:${repo.default_branch}...`);
-
-    const { shouldBypass, bypassAllowancePayload } = getBypassAllowancePayload(protection);
-    const { shouldRestrict, restrictionsPayload } = getRestrictionsPayload(protection);
-
-    const updateBranchProtectionPayload = {
-      owner: OWNER,
-      repo: repo.name,
-      branch: repo.default_branch,
-      required_pull_request_reviews: {
-        dismiss_stale_reviews: protection.required_pull_request_reviews?.dismiss_stale_reviews,
-        required_approving_review_count: protection.required_pull_request_reviews?.required_approving_review_count || 1,
-        require_code_owner_reviews: true,  // <== likely the point of this whole exercise
-      },
-      enforce_admins: protection.enforce_admins?.enabled,
-      required_status_checks: {
-        strict: protection.required_status_checks?.strict,
-        checks: protection.required_status_checks?.checks,
-      },
-      required_signatures: protection.required_signatures?.enabled,
-      required_linear_history: protection.required_linear_history?.enabled,
-      allow_force_pushes: protection.allow_force_pushes?.enabled,
-      allow_deletions: protection.allow_deletions?.enabled,
-      required_conversation_resolution: protection.required_conversation_resolution?.enabled,  
-    };
-
-    if (shouldBypass) {
-      updateBranchProtectionPayload.required_pull_request_reviews.bypass_pull_request_allowances = bypassAllowancePayload;
-    }
-    updateBranchProtectionPayload.restrictions = shouldRestrict ? restrictionsPayload : null; // required field
-
-    await waitForSecondaryRateLimitWindow();
-    const updateRes = await octokit.repos.updateBranchProtection(updateBranchProtectionPayload);
-    addRateLimitingEvent();
-    if (DEBUG) log(JSON.stringify(updateRes, null, 2), 'debug');
-  }
-
- return;
+  return mergeRes;
 }
 
 async function getDefaultBranchProtection(repo) {
