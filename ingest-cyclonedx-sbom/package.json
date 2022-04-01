@@ -37,7 +37,7 @@
     "dotenv": "^8.2.0",
     "fs-extra": "^9.0.1",
     "glob": "^7.1.6",
-    "minimist": "^1.2.5"
+    "minimist": "^1.2.6"
   },
   "devDependencies": {
     "@types/node": "^13.9.8",
