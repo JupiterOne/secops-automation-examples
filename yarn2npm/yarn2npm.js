@@ -10,8 +10,11 @@ const prbranch = "yarn2npm-patch1";
 
 const tmpDir="yarn2npm_tmp";
 const fs = require('fs');
+const path = require("path");
 const dir = `${tmpDir}/${repo}`;
 const backupDir = `${tmpDir}/${repo}/yarn2npm`;
+
+
 
 const main = async () => {
     try {
@@ -50,9 +53,23 @@ const main = async () => {
             });
         }
         catch(e){
-            console.log(`Error. Creating lock file ${backupDir}/failed.lock`);
+            console.log(`Error running npm install. Creating lock file ${backupDir}/failed.lock`);
             fs.closeSync(fs.openSync(`${currentPath}/${backupDir}/failed.lock`, 'a'));
         }
+
+        //Grab the npm log
+        const npmlogDir = (`${require('os').homedir()}/.npm/_logs/`);
+        const newestLog = (fs.readdirSync(npmlogDir)
+                                .filter((file) => fs.lstatSync(path.join(npmlogDir, file)).isFile())
+                                .map((file) => ({ file, mtime: fs.lstatSync(path.join(npmlogDir, file)).mtime }))
+                                .sort((a, b) => b.mtime.getTime() - a.mtime.getTime()))[0].file;
+
+        console.log(`Backing up npm logs`);
+        fs.copyFile (`${npmlogDir}/${newestLog}`, `${currentPath}/${backupDir}/${newestLog}`, (err) => {
+            if (err) throw err;
+        });
+
+        //Find and replace yarn commands
 
         return [];
     } catch (e) {
