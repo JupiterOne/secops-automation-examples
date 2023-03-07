@@ -6,7 +6,7 @@ const gitHubAuthFunct = () => { return { username: process.env.GITHUB_AUTH_TOKEN
 
 const org = 'jupiterone';
 const repo = process.argv.slice(2);
-const prbranch = "yarn2npm-patch1";
+const prbranch = "yarn2npm-patch-1";
 
 const tmpDir="yarn2npm_tmp";
 const fs = require('fs');
@@ -75,7 +75,7 @@ const main = async () => {
         });
 
         //Find and replace yarn commands
-        onsole.log(`Replacing yarn commands with npm`);
+        console.log(`Replacing yarn commands with npm`);
         const packageFile = fs.readFileSync(`package.json`, {
             encoding: 'utf8',
             flag: 'r',
@@ -86,10 +86,35 @@ const main = async () => {
             if (err) return console.log(err);
         });
 
+        // Check to see if changes needs to be pushed
+        await pushChanges(`${currentPath}/${dir}`);
+
         return [];
     } catch (e) {
       console.log(`Error ${e}`);
     }
+}
+
+async function pushChanges (dir) {
+    console.log(`Pushing changes`);
+    await git.commit({
+      fs,
+      dir,
+      author: {
+        name: 'J1 Security',
+        email: 'security@jupiterone.com'
+      },
+      message: 'Updating yarn to npm'
+    });
+  
+    await git.push({
+      fs,
+      http,
+      dir,
+      remote: 'origin',
+      force: true,
+      onAuth: gitHubAuthFunct
+    });
 }
 
 async function createYarn2NpmBranch (repo, dir, org, branch = prbranch) {
