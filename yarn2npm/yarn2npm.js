@@ -27,6 +27,11 @@ const main = async () => {
         //Create github branch
         await createYarn2NpmBranch(repo, dir, org)
 
+        if (fs.existsSync(`${dir}/package-lock.json`)){
+            console.log(`${repo} is already configured for npm`);
+            return[];
+        }
+
         //Create backup dir
         if (!fs.existsSync(backupDir)){
             fs.mkdirSync(backupDir);
@@ -70,6 +75,16 @@ const main = async () => {
         });
 
         //Find and replace yarn commands
+        onsole.log(`Replacing yarn commands with npm`);
+        const packageFile = fs.readFileSync(`package.json`, {
+            encoding: 'utf8',
+            flag: 'r',
+          })
+          .toString().replace(/yarn/g,'npm run')
+        
+        fs.writeFile(`package.json`, packageFile, 'utf8', function (err) {
+            if (err) return console.log(err);
+        });
 
         return [];
     } catch (e) {
