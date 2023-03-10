@@ -5,13 +5,12 @@ const http = require('isomorphic-git/http/node');
 const gitHubAuthFunct = () => { return { username: process.env.GITHUB_AUTH_TOKEN, password: '' }; };
 
 const org = 'jupiterone';
-const repoName = process.argv.slice(2);
 const prbranch = "yarn2npm-patch-1";
 
-const repoPath= './yarn2npm_tmp';
 const fs = require('fs');
 const path = require("path");
-const dir = `${repoPath}/${repoName}`;
+const repoName = process.argv.slice(2);
+const dir = `./${repoName}`;
 const backupDir = 'yarn2npm';
 
 
@@ -19,11 +18,6 @@ const backupDir = 'yarn2npm';
 const main = async () => {
     try {
         const origPath = process.cwd();
-
-        //Create tmp working
-        if (!fs.existsSync(repoPath)){
-            fs.mkdirSync(repoPath);
-        }
        
         //Create github branch
         await createYarn2NpmBranch(repoName, dir, org)
