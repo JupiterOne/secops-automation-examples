@@ -22,6 +22,8 @@ Run the script from within a temp directory
 
 ```
 cameron@laptop Code % git clone git@github.com:JupiterOne/secops-automation-examples.git
+cameron@laptop Code % cd secops-automation-examples/yarn2npm/ && npm install
+cameron@laptop Code % cd ../../
 cameron@laptop Code % mkdir tmpDir
 cameron@laptop Code % cd tmpDir
 cgriffin@cgriffin-MBP tmpDir % node ../secops-automation-examples/yarn2npm/yarn2npm.js test-aut-web-juno
