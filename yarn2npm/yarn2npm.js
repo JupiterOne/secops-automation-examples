@@ -20,7 +20,7 @@ const main = async () => {
         const origPath = process.cwd();
        
         //Create github branch
-        await createYarn2NpmBranch(repoName, dir, org)
+        await createYarn2NpmBranch(repoName, dir, org);
 
         if (fs.existsSync(`${dir}/package-lock.json`)){
             console.log(`${repoName} is already configured for npm`);
@@ -85,7 +85,7 @@ const main = async () => {
             encoding: 'utf8',
             flag: 'r',
           })
-          .toString().replace(/yarn/g,'npm run')
+          .toString().replace(/yarn/g,'npm run');
         
         fs.writeFile(`${dir}/package.json`, packageFile, 'utf8', function (err) {
             if (err) return console.log(err);
