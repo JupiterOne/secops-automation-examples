@@ -1,0 +1,14 @@
+{
+  "name": "yarn2npm",
+  "version": "1.0.0",
+  "description": "convert yarn to npm",
+  "main": "yarn2npm.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Cameron Griffin",
+  "dependencies": {
+    "@actions/github": "^5.1.1",
+    "isomorphic-git": "^1.21.0"
+  }
+}
