@@ -1,4 +1,12 @@
 {
+  "name": "secops-automation-examples",
+  "version": "0.0.0",
+  "description": "Automatically generated package.json, please edit manually",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JupiterOne/secops-automation-examples"
+  },
+  "license": "UNLICENSED",
   "dependencies": {
     "@jupiterone/jupiterone-client-nodejs": "^0.11.3",
     "commander": "^2.20.0",

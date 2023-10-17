@@ -1,0 +1,12 @@
+openapi: 3.0.1
+info:
+  title: secops-automation-examples
+  description: Automatically generated package.json, please edit manually
+  x-cortex-git:
+    github:
+      repository: JupiterOne/secops-automation-examples
+  x-cortex-owners:
+    - type: group
+      name: JupiterOne/security
+  x-cortex-service-groups: tier-4
+  x-cortex-tag: secops-automation-examples
