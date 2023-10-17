@@ -1,103 +1,126 @@
 const {execSync} = require('child_process')
-
 const git = require('isomorphic-git');
 const http = require('isomorphic-git/http/node');
 const gitHubAuthFunct = () => { return { username: process.env.GITHUB_AUTH_TOKEN, password: '' }; };
-
 const org = 'jupiterone';
 const prbranch = "yarn2npm-patch-1";
-
 const fs = require('fs');
 const path = require("path");
 const repoName = process.argv.slice(2);
 const dir = `./${repoName}`;
 const backupDir = 'yarn2npm';
 
-
-
 const main = async () => {
     try {
         const origPath = process.cwd();
        
-        //Create github branch
+        // Create github branch
         await createYarn2NpmBranch(repoName, dir, org);
 
-        if (fs.existsSync(`${dir}/package-lock.json`)){
-            console.log(`${repoName} is already configured for npm`);
-            return[];
-        }
+        // Find all the yarn.lock files
+        const yarnDirs = await traverseDir(dir);
 
-        //Create backup dir
-        if (!fs.existsSync(`${dir}/${backupDir}`)){
-            fs.mkdirSync(`${dir}/${backupDir}`);
-        }
+        for ( const yarnDir of yarnDirs ){
 
-        //Backup package.json
-        let copyFile = 'orig-package.json';
-        console.log(`Backing up package.json to ${copyFile}`);
-        fs.copyFile(`${dir}/package.json`, `${dir}/${backupDir}/${copyFile}`, (err) => {
-            if (err) throw err;
-        });
-        await git.add({ fs, dir, filepath: `${backupDir}/${copyFile}` });
-  
-        //remove yarn.lock
-        console.log(`Removing yarn.lock`);
-        fs.unlink(`${dir}/yarn.lock`, (err) => {
-           if (err) throw err;
-        });
-        await git.remove({ fs, dir, filepath: 'yarn.lock' });
+            
+            // Create backup dir
+            if (!fs.existsSync(`${yarnDir}/${backupDir}`)){
+                fs.mkdirSync(`${yarnDir}/${backupDir}`);
+            }
 
-        //npm install
-        console.log(`Running npm install`);
-        process.chdir(dir);
-        try{
-            execSync('npm install', {stdio: 'inherit'}, function(error) {
-                if (error) {
-                    console.log(`exit: ${error.code}`);
-                }
+            // Backup package.json
+            let copyFile = 'orig-package.json';
+            //console.log(`Backing up ${yarnDir}/package.json to ${yarnDir}/${backupDir}/${copyFile}`);
+            fs.copyFile(`${yarnDir}/package.json`, `${yarnDir}/${backupDir}/${copyFile}`, (err) => {
+                if (err) throw err;
             });
-        }
-        catch(e){
-            console.log(`Error running npm install. Creating lock file ${backupDir}/failed.lock`);
-            fs.closeSync(fs.openSync(`${origPath}/${backupDir}/failed.lock`, 'a'));
-            await git.add({ fs, dir: `${origPath}/${backupDir}`, filepath: 'failed.lock' });
-        }
-        process.chdir(origPath);
-        await git.add({ fs, dir, filepath: 'package-lock.json' });
 
+            // remove the repoName from the git command
+            let gitPath = (`${yarnDir}/${backupDir}`).replace(repoName, '').replace(/^\//, '');
+            console.log(`Adding ${gitPath}/${copyFile}`);
+            await git.add({ fs, dir, filepath: `${gitPath}/${copyFile}` });
 
-        //Grab the npm log
-        const npmlogDir = (`${require('os').homedir()}/.npm/_logs/`);
-        const newestLog = (fs.readdirSync(npmlogDir)
-                                .filter((file) => fs.lstatSync(path.join(npmlogDir, file)).isFile())
-                                .map((file) => ({ file, mtime: fs.lstatSync(path.join(npmlogDir, file)).mtime }))
-                                .sort((a, b) => b.mtime.getTime() - a.mtime.getTime()))[0].file;
+            //remove yarn.lock
+            console.log(`Removing ${yarnDir}/yarn.lock`);
+            fs.unlink(`${yarnDir}/yarn.lock`, (err) => {
+                if (err) throw err;
+            });
+            await git.remove({ fs, dir, filepath: `${yarnDir}/yarn.lock` });
 
-        console.log(`Backing up npm logs`);
-        fs.copyFile (`${npmlogDir}/${newestLog}`, `${dir}/${backupDir}/${newestLog}`, (err) => {
-            if (err) throw err;
-        });
-        await git.add({ fs, dir, filepath: `${backupDir}/${newestLog }` });
+            //npm install
+            console.log(`Running npm install`);
+            process.chdir(yarnDir);
+            try{
+                //--legacy-peer-deps
+                execSync('npm install --legacy-peer-deps --loglevel verbose', {stdio: 'inherit'}, function(error) {
+                    if (error) {
+                        console.log(`exit: ${error.code}`);
+                    }
+                });
+            }
+            catch(e){
+                console.log(`Error running npm install. Creating lock file ${backupDir}/failed.lock`);
+                fs.closeSync(fs.openSync(`${origPath}/${backupDir}/failed.lock`, 'a'));
+                await git.add({ fs, dir: `${origPath}/${backupDir}`, filepath: 'failed.lock' });
+            }
+            process.chdir(origPath);
 
-        //Find and replace yarn commands
-        console.log(`Replacing yarn commands with npm`);
-        const packageFile = fs.readFileSync(`${dir}/package.json`, {
-            encoding: 'utf8',
-            flag: 'r',
-          })
-          .toString().replace(/yarn/g,'npm run');
-        
-        fs.writeFile(`${dir}/package.json`, packageFile, 'utf8', function (err) {
-            if (err) return console.log(err);
-        });
-        await git.add({ fs, dir, filepath: 'package.json' });
-               
-        await pushChanges(dir);
+            gitPath = (`${yarnDir}/package-lock.json`).replace(repoName, '').replace(/^\//, '');
+            console.log(`Adding ${gitPath}`);
+            await git.add({ fs, dir, filepath: gitPath });
 
+            //Grab the npm log
+            const npmlogDir = (`${require('os').homedir()}/.npm/_logs/`);
+            const newestLog = (fs.readdirSync(npmlogDir)
+                                    .filter((file) => fs.lstatSync(path.join(npmlogDir, file)).isFile())
+                                    .map((file) => ({ file, mtime: fs.lstatSync(path.join(npmlogDir, file)).mtime }))
+                                    .sort((a, b) => b.mtime.getTime() - a.mtime.getTime()))[0].file;
+
+            console.log(`Backing up npm logs`);
+            fs.copyFile (`${npmlogDir}/${newestLog}`, `${yarnDir}/${backupDir}/${newestLog}`, (err) => {
+                if (err) throw err;
+            });
+            gitPath = (`${yarnDir}/${backupDir}/${newestLog}`).replace(repoName, '').replace(/^\//, '');
+            console.log(`Adding ${gitPath}`);
+            await git.add({ fs, dir, filepath: gitPath });
+
+            //Find and replace yarn commands
+            console.log(`Replacing yarn commands with npm`);
+            const packageFile = fs.readFileSync(`${yarnDir}/package.json`, {
+                encoding: 'utf8',
+                flag: 'r',
+            })
+            .toString().replace(/yarn/g,'npm run');
+            
+            fs.writeFile(`${yarnDir}/package.json`, packageFile, 'utf8', function (err) {
+                if (err) return console.log(err);
+            });
+
+            gitPath = (`${yarnDir}/package.json`).replace(repoName, '').replace(/^\//, '');
+            console.log(`Adding ${gitPath}`);
+            await git.add({ fs, dir, filepath: gitPath });
+            
+            //await pushChanges(dir);
+    }
         return [];
     } catch (e) {
       console.log(`Error ${e}`);
     }
+}
+
+async function traverseDir(dir, paths = []) {
+    fs.readdirSync(dir).forEach(file => {
+        let fullPath = path.join(dir, file);
+        if (fs.lstatSync(fullPath).isDirectory()) {
+            traverseDir(fullPath, paths);
+        } else {
+            if ( fullPath.includes('yarn.lock') && !fullPath.includes('node_modules') ){
+                let yarnPath = path.dirname(fullPath);
+                paths.push(yarnPath);
+            }
+        }  
+    });
+    return paths;
 }
 
 async function pushChanges (dir) {
@@ -109,7 +132,7 @@ async function pushChanges (dir) {
         name: 'J1 Security',
         email: 'security@jupiterone.com'
       },
-      message: 'Updating yarn to npm'
+      message: 'Updating yarn to npm.'
     });
   
     await git.push({
@@ -131,7 +154,6 @@ async function createYarn2NpmBranch (repo, dir, org, branch = prbranch) {
 }
 
 async function cloneRepo (repo, dir, org) {
-    console.log(`Cloning https://github.com/${org}/${repo}`)
     try {
       await git.clone({
         fs,
